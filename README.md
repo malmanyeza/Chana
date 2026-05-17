@@ -1,50 +1,74 @@
-# Welcome to your Expo app 👋
+# 💖 Chana — Premium Social Discovery & Matching Platform
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Chana is a state-of-the-art social matching and discovery platform designed for modern mobile and web experiences. Built using a high-performance stack, it features realtime websocket synchronization, a stunning premium user interface, and robust cloud services.
 
-## Get started
+## 🚀 Repository Structure
 
-1. Install dependencies
+This is a monorepo containing all the core components of the Chana platform:
 
+- **`/mobile`**: The iOS & Android mobile application built with **React Native**, **Expo Router**, **Zustand**, and **Supabase Client**.
+- **`/dashboard`**: The administrator management console built with **React** for user, safety, and system reporting.
+- **`/supabase`**: Database migrations, edge functions, triggers, and configuration schemas for **Supabase / PostgreSQL**.
+
+---
+
+## 🛠️ Technology Stack
+
+### Mobile Frontend
+- **Framework:** Expo (React Native) with File-based routing (Expo Router)
+- **State Management:** Zustand (for reactive caching and badge handling)
+- **Styling:** Premium themed colors, HSL tailored palettes, and safe container offsets
+- **Database Connection:** Supabase SDK with realtime socket replication
+
+### Backend & Database
+- **Provider:** Supabase
+- **Database:** PostgreSQL (with Row Level Security (RLS) policies)
+- **Realtime Broadcasts:** Enabled via Postgres Replication Publications (`supabase_realtime`)
+- **Server-side Logic:** Custom database triggers, PL/pgSQL triggers, and Deno Edge Functions
+
+---
+
+## 🏁 Getting Started
+
+### 📱 1. Running the Mobile App
+1. Navigate to the mobile directory:
+   ```bash
+   cd mobile
+   ```
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+3. Start the Expo development server:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+### 🖥️ 2. Running the Admin Dashboard
+1. Navigate to the dashboard directory:
+   ```bash
+   cd dashboard
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the local server:
+   ```bash
+   npm run dev
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛡️ Safety & Quality Guidelines
 
-## Get a fresh project
+Chana is engineered with a strict focus on privacy and user safety. Key implemented policies include:
+- **Encrypted authentication tokens** via `SecureStore`.
+- **Row Level Security (RLS)** protecting active profiles and private swipes.
+- **In-app Safety Guidelines** designed to educate and protect users.
+- **Realtime push alerts** for instant user matches.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## ⚖️ License
+All rights reserved. © 2026 Chana.

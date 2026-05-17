@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "15796302531",
+    "project_id": "chana-fd5e0",
+    "storage_bucket": "chana-fd5e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15796302531:android:37394d027bda3e1878a876",
+        "android_client_info": {
+          "package_name": "com.chana.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0-Jh2tUYO0qSgoARjan_CYcjTBXfQvks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
