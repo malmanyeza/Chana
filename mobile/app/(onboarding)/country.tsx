@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -38,75 +40,80 @@ export default function CountryOnboarding() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => router.back()} 
-          style={[styles.backButton, { backgroundColor: theme.card, borderColor: theme.border }]}
-        >
-          <Ionicons name="chevron-back" size={24} color={theme.text} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <ProgressBar progress={0.28} label="Step 2 of 8" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={[styles.backButton, { backgroundColor: theme.card, borderColor: theme.border }]}
+          >
+            <Ionicons name="chevron-back" size={24} color={theme.text} />
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: SPACING.md }}>
+            <ProgressBar progress={0.28} label="Step 2 of 8" />
+          </View>
         </View>
-      </View>
 
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>Where are you from?</Text>
-        <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          Your national flag will appear on your profile.
-        </Text>
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: theme.text }]}>Where are you from?</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+            Your national flag will appear on your profile.
+          </Text>
 
-        <Input
-          placeholder="Search for a country..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          icon="search-outline"
-        />
+          <Input
+            placeholder="Search for a country..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            icon="search-outline"
+          />
 
-        <FlatList
-          data={filteredCountries}
-          keyExtractor={(item) => item.name}
-          style={styles.list}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => {
-            const isSelected = data.country === item.emoji;
-            return (
-              <TouchableOpacity
-                style={[
-                  styles.countryItem,
-                  { backgroundColor: theme.card, borderColor: theme.border },
-                  isSelected && { borderColor: theme.primary, backgroundColor: `${theme.primary}10` }
-                ]}
-                onPress={() => handleSelect(item.emoji)}
-              >
-                <View style={styles.countryInfo}>
-                  <Text style={styles.emoji}>{item.emoji}</Text>
-                  <Text style={[styles.countryName, { color: theme.text }]}>
-                    {item.name}
-                  </Text>
-                </View>
-                {isSelected && (
-                  <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
-                )}
-              </TouchableOpacity>
-            );
-          }}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: theme.textMuted }]}>
-              No countries found.
-            </Text>
-          }
-        />
-      </View>
-      
-      <View style={[styles.footer, { borderTopColor: theme.border }]}>
-        <Button
-          title="Continue"
-          disabled={!isComplete}
-          onPress={() => router.push('/(onboarding)/birthday')}
-        />
-      </View>
+          <FlatList
+            data={filteredCountries}
+            keyExtractor={(item) => item.name}
+            style={styles.list}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => {
+              const isSelected = data.country === item.emoji;
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.countryItem,
+                    { backgroundColor: theme.card, borderColor: theme.border },
+                    isSelected && { borderColor: theme.primary, backgroundColor: `${theme.primary}10` }
+                  ]}
+                  onPress={() => handleSelect(item.emoji)}
+                >
+                  <View style={styles.countryInfo}>
+                    <Text style={styles.emoji}>{item.emoji}</Text>
+                    <Text style={[styles.countryName, { color: theme.text }]}>
+                      {item.name}
+                    </Text>
+                  </View>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+                  )}
+                </TouchableOpacity>
+              );
+            }}
+            ListEmptyComponent={
+              <Text style={[styles.emptyText, { color: theme.textMuted }]}>
+                No countries found.
+              </Text>
+            }
+          />
+        </View>
+        
+        <View style={[styles.footer, { borderTopColor: theme.border }]}>
+          <Button
+            title="Continue"
+            disabled={!isComplete}
+            onPress={() => router.push('/(onboarding)/birthday')}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
