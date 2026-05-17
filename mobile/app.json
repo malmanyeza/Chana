@@ -2,7 +2,7 @@
   "expo": {
     "name": "Chana",
     "slug": "Chana",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "chana",
@@ -17,6 +17,7 @@
     },
     "android": {
       "package": "com.chana.app",
+      "versionCode": 5,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "adjustResize",
       "adaptiveIcon": {
