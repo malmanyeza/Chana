@@ -113,8 +113,8 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
         if (translateX.value > 0) {
           if (!hasSwipes) {
             // Spring back to center and trigger check
-            translateX.value = withSpring(0);
-            translateY.value = withSpring(0, {}, () => {
+            translateY.value = withSpring(0);
+            translateX.value = withSpring(0, {}, () => {
               'worklet';
               runOnJS(onSwipeRight)();
             });
