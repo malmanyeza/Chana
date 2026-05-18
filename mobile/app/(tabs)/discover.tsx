@@ -15,6 +15,7 @@ import { SwipeCard } from '../../components/cards/SwipeCard';
 import { MatchModal } from '../../components/overlays/MatchModal';
 import { FilterModal } from '../../components/overlays/FilterModal';
 import { PremiumModal } from '../../components/overlays/PremiumModal';
+import { SwipeLimitModal } from '../../components/overlays/SwipeLimitModal';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useBadgeStore } from '../../stores/badgeStore';
@@ -36,6 +37,7 @@ const DiscoverScreen = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showSwipeLimitModal, setShowSwipeLimitModal] = useState(false);
   const [newMatch, setNewMatch] = useState<NewMatch | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -246,7 +248,7 @@ const DiscoverScreen = () => {
     // 1. Check Swipe Limit for Free Users
     const isPremium = isPremiumActive(profile);
     if (!isPremium && profile.swipes_remaining <= 0 && (action === 'like' || action === 'superlike')) {
-      setShowPremiumModal(true);
+      setShowSwipeLimitModal(true);
       return;
     }
 
@@ -446,6 +448,16 @@ const DiscoverScreen = () => {
         visible={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
         feature="swipes"
+      />
+
+      {/* Swipe Limit Interstitial Alert */}
+      <SwipeLimitModal
+        visible={showSwipeLimitModal}
+        onClose={() => setShowSwipeLimitModal(false)}
+        onUnlockPremium={() => {
+          setShowSwipeLimitModal(false);
+          setShowPremiumModal(true);
+        }}
       />
     </SafeAreaView>
   );
