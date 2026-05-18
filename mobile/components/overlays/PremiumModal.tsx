@@ -60,7 +60,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
   const getSubtitle = () => {
     const firstName = profile?.full_name?.split(' ')[0] || 'there';
-    return `It's only a dollar to find your soulmate, ${firstName}.`;
+    return `Find your soulmate today, ${firstName}.`;
   };
 
   const features = [
@@ -318,8 +318,8 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                 </LinearGradient>
 
                 <View style={styles.content}>
-                  <View style={[styles.promoBox, { backgroundColor: theme.primary + '10' }]}>
-                    <Text style={[styles.promoTitle, { color: theme.primary }]}>
+                  <View style={[styles.promoBox, { backgroundColor: theme.surface }]}>
+                    <Text style={[styles.promoTitle, { color: theme.textMuted }]}>
                       {getSubtitle()}
                     </Text>
                   </View>
@@ -538,18 +538,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   promoBox: {
-    padding: 20,
-    borderRadius: 20,
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 20,
     width: '100%',
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.3)',
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   promoTitle: {
-    fontFamily: FONTS.display,
-    fontSize: 22,
+    fontFamily: FONTS.body,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 30,
+    lineHeight: 20,
   },
   featureList: {
     width: '100%',
