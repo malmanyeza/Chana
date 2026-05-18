@@ -360,7 +360,7 @@ const DiscoverScreen = () => {
         {isLoading ? (
           <ActivityIndicator size="large" color={theme.primary} />
         ) : profiles.length > 0 ? (
-          <Animated.View entering={FadeIn.duration(400)} style={{ flex: 1, width: '100%' }}>
+          <Animated.View entering={FadeIn.duration(400)} style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
             {profiles.map((p, index) => (
               <SwipeCard
                 key={p.id}
