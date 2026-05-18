@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useBadgeStore } from '../../stores/badgeStore';
 import { Profile } from '../../types';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { isPremiumActive } from '../../lib/premium';
 
@@ -359,29 +360,31 @@ const DiscoverScreen = () => {
         {isLoading ? (
           <ActivityIndicator size="large" color={theme.primary} />
         ) : profiles.length > 0 ? (
-          profiles.map((p, index) => (
-            <SwipeCard
-              key={p.id}
-              profile={{
-                id: p.id,
-                name: p.full_name || 'Someone',
-                age: p.birth_date && !isNaN(new Date(p.birth_date).getTime())
-                  ? new Date().getFullYear() - new Date(p.birth_date).getFullYear()
-                  : 0,
-                photos: Array.isArray(p.photos) ? p.photos.filter(url => !!url) : (p.avatar_url ? [p.avatar_url] : []),
-                city: p.location_city || 'Nearby',
-                country: p.country || '',
-                distance: p.distance_km !== undefined && p.distance_km !== null ? `${Math.round(p.distance_km)} km away` : '',
-                interests: Array.isArray(p.interests) ? p.interests : [],
-                isVerified: false,
-                bio: p.bio || '',
-              }}
-              isTop={index === profiles.length - 1}
-              hasSwipes={isPremiumActive(profile) || profile.swipes_remaining > 0}
-              onSwipeLeft={() => handleSwipe(p.id, 'pass')}
-              onSwipeRight={() => handleSwipe(p.id, 'like')}
-            />
-          ))
+          <Animated.View entering={FadeIn.duration(400)} style={{ flex: 1, width: '100%' }}>
+            {profiles.map((p, index) => (
+              <SwipeCard
+                key={p.id}
+                profile={{
+                  id: p.id,
+                  name: p.full_name || 'Someone',
+                  age: p.birth_date && !isNaN(new Date(p.birth_date).getTime())
+                    ? new Date().getFullYear() - new Date(p.birth_date).getFullYear()
+                    : 0,
+                  photos: Array.isArray(p.photos) ? p.photos.filter(url => !!url) : (p.avatar_url ? [p.avatar_url] : []),
+                  city: p.location_city || 'Nearby',
+                  country: p.country || '',
+                  distance: p.distance_km !== undefined && p.distance_km !== null ? `${Math.round(p.distance_km)} km away` : '',
+                  interests: Array.isArray(p.interests) ? p.interests : [],
+                  isVerified: false,
+                  bio: p.bio || '',
+                }}
+                isTop={index === profiles.length - 1}
+                hasSwipes={isPremiumActive(profile) || profile.swipes_remaining > 0}
+                onSwipeLeft={() => handleSwipe(p.id, 'pass')}
+                onSwipeRight={() => handleSwipe(p.id, 'like')}
+              />
+            ))}
+          </Animated.View>
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="sparkles-outline" size={64} color={theme.textMuted} />
