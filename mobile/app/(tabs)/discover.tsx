@@ -54,6 +54,60 @@ const DiscoverScreen = () => {
     }
   }, [profile?.preferences?.interestedIn, profile?.preferences?.distance, profile?.preferences?.minAge, profile?.preferences?.maxAge]);
 
+  const checkDailySwipeReset = async () => {
+    if (!user || !profile) return;
+
+    try {
+      const lastReset = profile.last_swipe_reset ? new Date(profile.last_swipe_reset) : null;
+      const now = new Date();
+      const isPremium = isPremiumActive(profile);
+
+      // Reset only if free user AND (lastReset is null or 24 hours have passed)
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      if (!isPremium && (!lastReset || (now.getTime() - lastReset.getTime() >= twentyFourHours))) {
+        console.log('🔄 Daily swipes limit expired or never reset. Fetching limit from system_settings...');
+
+        let limit = 20;
+        const { data: settingData, error: settingError } = await supabase
+          .from('system_settings')
+          .select('value')
+          .eq('key', 'free_swipes_limit')
+          .single();
+
+        if (!settingError && settingData?.value) {
+          limit = parseInt(settingData.value) || 20;
+        }
+
+        console.log(`🎯 Applying dynamic daily swipe limit: ${limit} swipes`);
+
+        const newRemaining = limit;
+        const newResetTime = now.toISOString();
+
+        const updatedProfile = {
+          ...profile,
+          swipes_remaining: newRemaining,
+          last_swipe_reset: newResetTime,
+        };
+
+        setProfile(updatedProfile);
+
+        // Update DB in background
+        supabase
+          .from('profiles')
+          .update({
+            swipes_remaining: newRemaining,
+            last_swipe_reset: newResetTime
+          })
+          .eq('id', user.id)
+          .then(({ error }) => {
+            if (error) console.error('Error updating profiles daily reset DB:', error);
+          });
+      }
+    } catch (err) {
+      console.error('Error in daily swipes reset check:', err);
+    }
+  };
+
   const fetchProfiles = async () => {
     if (!user || !profile) return;
     setIsLoading(true);
@@ -131,7 +185,11 @@ const DiscoverScreen = () => {
   };
 
   useEffect(() => {
-    fetchProfiles();
+    const initDiscover = async () => {
+      await checkDailySwipeReset();
+      fetchProfiles();
+    };
+    initDiscover();
 
     if (!user) return;
 

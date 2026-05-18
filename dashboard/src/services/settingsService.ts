@@ -36,3 +36,31 @@ export const updatePlanPrice = async (id: string, newPrice: number): Promise<boo
   
   return true;
 };
+
+export const fetchSystemSetting = async (key: string, fallback: string = ''): Promise<string> => {
+  const { data, error } = await supabase
+    .from('system_settings')
+    .select('value')
+    .eq('key', key)
+    .single();
+
+  if (error) {
+    console.warn(`Error fetching system setting '${key}':`, error.message);
+    return fallback;
+  }
+
+  return data?.value ?? fallback;
+};
+
+export const updateSystemSetting = async (key: string, value: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('system_settings')
+    .upsert({ key, value, updated_at: new Date().toISOString() });
+
+  if (error) {
+    console.error(`Error updating system setting '${key}':`, error);
+    return false;
+  }
+
+  return true;
+};
