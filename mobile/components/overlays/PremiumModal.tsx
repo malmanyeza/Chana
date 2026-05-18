@@ -13,7 +13,8 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView
+  ScrollView,
+  Share
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -92,6 +93,39 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
     };
     fetchPlans();
   }, []);
+
+  const handleInviteFriend = async () => {
+    try {
+      const result = await Share.share({
+        message: `Hey! I'm using Chana to meet awesome new people. Join me using my invite link and let's discover genuine connections! https://chana.app/invite?ref=${profile?.id || ''}`,
+      });
+
+      if (result.action === Share.sharedAction) {
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && profile) {
+          const newRemaining = (profile.swipes_remaining || 0) + 15;
+          const { error } = await supabase
+            .from('profiles')
+            .update({ swipes_remaining: newRemaining })
+            .eq('id', session.user.id);
+
+          if (error) throw error;
+
+          Alert.alert(
+            'Thank you! 💖',
+            'You successfully shared Chana! 15 bonus swipes have been added to your profile.',
+            [{ text: 'Start Swiping!', onPress: onClose }]
+          );
+        }
+      }
+    } catch (error: any) {
+      console.error('Sharing error:', error);
+      Alert.alert('Error', 'Unable to process invite. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpgrade = async () => {
     if (paymentMethod === 'ecocash' && (!phone || phone.length < 10)) {
@@ -395,6 +429,36 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                   </TouchableOpacity>
 
                   <Text style={styles.footerNote}>Recurring billing. Cancel anytime.</Text>
+
+                  {feature === 'swipes' && (
+                    <View style={styles.inviteContainer}>
+                      <View style={styles.dividerRow}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>OR GET FREE SWIPES</Text>
+                        <View style={styles.dividerLine} />
+                      </View>
+
+                      <TouchableOpacity 
+                        style={styles.inviteCard}
+                        onPress={handleInviteFriend}
+                        activeOpacity={0.8}
+                        disabled={loading}
+                      >
+                        <LinearGradient
+                          colors={['rgba(255,90,95,0.08)', 'rgba(255,138,0,0.08)']}
+                          style={StyleSheet.absoluteFillObject}
+                        />
+                        <View style={styles.inviteIconCircle}>
+                          <Ionicons name="share-social" size={20} color="#FF5A5F" />
+                        </View>
+                        <View style={styles.inviteContent}>
+                          <Text style={styles.inviteTitle}>Invite a Friend</Text>
+                          <Text style={styles.inviteSubtitle}>Share Chana & instantly get 15 free swipes!</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color="#8E8E93" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               </ScrollView>
             </View>
@@ -625,6 +689,61 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 12,
     fontFamily: FONTS.body,
+    color: '#8E8E93',
+  },
+  inviteContainer: {
+    width: '100%',
+    marginTop: 24,
+    paddingHorizontal: 4,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  dividerText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 10,
+    color: '#8E8E93',
+    letterSpacing: 1.5,
+  },
+  inviteCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    position: 'relative',
+    overflow: 'hidden',
+    gap: 12,
+  },
+  inviteIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,90,95,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inviteContent: {
+    flex: 1,
+    gap: 2,
+  },
+  inviteTitle: {
+    fontFamily: FONTS.display,
+    fontSize: 16,
+    color: '#FFF',
+  },
+  inviteSubtitle: {
+    fontFamily: FONTS.body,
+    fontSize: 11,
     color: '#8E8E93',
   }
 });
