@@ -42,13 +42,15 @@ interface SwipeCardProps {
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   isTop: boolean;
+  hasSwipes?: boolean;
 }
 
 export const SwipeCard: React.FC<SwipeCardProps> = ({ 
   profile, 
   onSwipeLeft, 
   onSwipeRight,
-  isTop 
+  isTop,
+  hasSwipes = true
 }) => {
   const theme = useAppTheme();
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -109,10 +111,19 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
     if (event.nativeEvent.state === 5) { // END
       if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
         if (translateX.value > 0) {
-          translateX.value = withSpring(width * 1.5, {}, () => {
-            'worklet';
-            runOnJS(onSwipeRight)();
-          });
+          if (!hasSwipes) {
+            // Spring back to center and trigger check
+            translateX.value = withSpring(0);
+            translateY.value = withSpring(0, {}, () => {
+              'worklet';
+              runOnJS(onSwipeRight)();
+            });
+          } else {
+            translateX.value = withSpring(width * 1.5, {}, () => {
+              'worklet';
+              runOnJS(onSwipeRight)();
+            });
+          }
         } else {
           translateX.value = withSpring(-width * 1.5, {}, () => {
             'worklet';

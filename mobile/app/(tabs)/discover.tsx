@@ -377,6 +377,7 @@ const DiscoverScreen = () => {
                 bio: p.bio || '',
               }}
               isTop={index === profiles.length - 1}
+              hasSwipes={isPremiumActive(profile) || profile.swipes_remaining > 0}
               onSwipeLeft={() => handleSwipe(p.id, 'pass')}
               onSwipeRight={() => handleSwipe(p.id, 'like')}
             />
