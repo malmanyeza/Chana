@@ -52,7 +52,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       // 3. Perform background cleanup with a timeout to prevent hanging
       const cleanup = Promise.allSettled([
-        GoogleSignin.signOut(),
+        (async () => {
+          try {
+            // Safe check for native GoogleSignin module existence
+            if (GoogleSignin && typeof GoogleSignin.signOut === 'function') {
+              // Sign out from Google only if signed in
+              const isSignedIn = await GoogleSignin.isSignedIn();
+              if (isSignedIn) {
+                await GoogleSignin.signOut();
+              }
+            }
+          } catch (e) {
+            console.log('GoogleSignin signOut skipped or failed:', e);
+          }
+        })(),
         supabase.auth.signOut()
       ]);
 
