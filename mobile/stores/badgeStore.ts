@@ -64,21 +64,23 @@ export const useBadgeStore = create<BadgeState>((set, get) => ({
   setupSubscriptions: (userId: string) => {
     const fetch = () => get().fetchCounts(userId);
 
+    const uniqueId = Math.random().toString(36).substring(7);
+
     // Subscribe to swipes (for likes count)
     const swipesSub = supabase
-      .channel('badge-swipes')
+      .channel(`badge-swipes-${userId}-${uniqueId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'swipes' }, fetch)
       .subscribe();
 
     // Subscribe to matches
     const matchesSub = supabase
-      .channel('badge-matches')
+      .channel(`badge-matches-${userId}-${uniqueId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, fetch)
       .subscribe();
 
     // Subscribe to messages (to decrement matches count when first message sent)
     const messagesSub = supabase
-      .channel('badge-messages')
+      .channel(`badge-messages-${userId}-${uniqueId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, fetch)
       .subscribe();
 
