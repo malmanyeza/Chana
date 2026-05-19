@@ -234,10 +234,22 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         });
 
         const expressText = await expressResp.text();
+        console.log('[PremiumModal] Paynow express response text:', expressText);
         const expressParams = new URLSearchParams(expressText);
         
         if (expressParams.get('status') !== 'Ok') {
           throw new Error(expressParams.get('error') || 'EcoCash USSD push failed.');
+        }
+
+        // Save the dynamic, sub-transaction pollurl returned from Paynow Express!
+        const expressPollUrl = expressParams.get('pollurl') || '';
+        if (expressPollUrl) {
+          const decodedPollUrl = decodeURIComponent(expressPollUrl);
+          console.log('[PremiumModal] Dynamic Paynow Express pollurl:', decodedPollUrl);
+          await supabase
+            .from('subscriptions')
+            .update({ poll_url: decodedPollUrl })
+            .eq('id', subscriptionId);
         }
 
         setIsPolling(true);
@@ -292,18 +304,25 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
       let rawPaynowResponse = null;
 
+      console.log('[PremiumModal] Manual check starting. Poll URL in DB:', subRecord.poll_url);
+
       // 2. Fetch the poll URL directly from the client (mobile device)
       if (subRecord.poll_url) {
         try {
           const paynowResp = await fetch(subRecord.poll_url);
           const paynowText = await paynowResp.text();
+          console.log('[PremiumModal] Client-side fetch response from Paynow poll_url:', paynowText);
           if (paynowText && paynowText.includes('status=')) {
             rawPaynowResponse = paynowText;
           }
         } catch (clientFetchErr) {
           console.warn('[PremiumModal] Manual fetch of poll_url failed:', clientFetchErr);
         }
+      } else {
+        console.warn('[PremiumModal] Warning: poll_url is empty in subscription record!');
       }
+
+      console.log('[PremiumModal] Sending POST to check-subscription. rawPaynowResponse is:', rawPaynowResponse);
 
       const response = await fetch(`${supabase.supabaseUrl}/functions/v1/check-subscription`, {
         method: 'POST',
@@ -316,6 +335,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
       });
 
       const resData = await response.json();
+      console.log('[PremiumModal] Response from check-subscription function:', resData);
       
       if (resData.error) {
         throw new Error(resData.error);

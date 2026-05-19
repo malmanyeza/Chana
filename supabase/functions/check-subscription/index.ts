@@ -35,6 +35,7 @@ Deno.serve(async (req: Request) => {
 
     // Helper function to upgrade subscription status and user profile
     const upgradeSubscription = async () => {
+      console.log(`[check-subscription] Upgrading subscription ${subscriptionId} and user ${subscription.user_id} to Chana Gold Premium`);
       // 1. Update subscription status
       await supabase.from('subscriptions').update({ status: 'paid' }).eq('id', subscriptionId);
       
@@ -48,16 +49,24 @@ Deno.serve(async (req: Request) => {
       }
 
       // 3. UPGRADE USER with Expiry
-      await supabase.from('profiles').update({ 
+      const { error: profileErr } = await supabase.from('profiles').update({ 
           is_premium: true,
           premium_until: expiryDate.toISOString()
       }).eq('id', subscription.user_id);
+
+      if (profileErr) {
+        console.error(`[check-subscription] Error upgrading user profile:`, profileErr);
+      } else {
+        console.log(`[check-subscription] User profile successfully upgraded until ${expiryDate.toISOString()}`);
+      }
     };
 
     // PROCESS PROXIED RESPONSE FROM CLIENT (IP-bypass method)
     if (rawPaynowResponse) {
+      console.log(`[check-subscription] Processing rawPaynowResponse from client: ${rawPaynowResponse}`);
       const params = new URLSearchParams(rawPaynowResponse);
       const status = params.get('status')?.toLowerCase()?.trim();
+      console.log(`[check-subscription] Client-proxied Paynow payment status: "${status}"`);
 
       if (status === 'paid' || status === 'ok' || status === 'awaiting delivery') {
           await upgradeSubscription();
@@ -65,6 +74,7 @@ Deno.serve(async (req: Request) => {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
       } else if (status === 'failed' || status === 'cancelled' || status === 'refused' || status === 'error') {
+          console.log(`[check-subscription] Client-proxied payment failed/cancelled. Updating status to failed.`);
           await supabase.from('subscriptions').update({ status: 'failed' }).eq('id', subscriptionId);
           return new Response(JSON.stringify({ 
               status: 'failed', 
@@ -73,10 +83,13 @@ Deno.serve(async (req: Request) => {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
       }
+    } else {
+      console.log(`[check-subscription] No rawPaynowResponse received in request body. Falling back to server fetch.`);
     }
 
     // FALLBACK SERVER-SIDE FETCH (May fail if cloud IP is blocked by Paynow)
     if (subscription.poll_url) {
+        console.log(`[check-subscription] Fetching poll_url from server: ${subscription.poll_url}`);
         try {
           const resp = await fetch(subscription.poll_url, {
               headers: {
@@ -84,8 +97,10 @@ Deno.serve(async (req: Request) => {
               }
           });
           const text = await resp.text();
+          console.log(`[check-subscription] Server-side Paynow raw response: ${text}`);
           const params = new URLSearchParams(text);
           const status = params.get('status')?.toLowerCase()?.trim();
+          console.log(`[check-subscription] Server-side Paynow payment status: "${status}"`);
 
           if (status === 'paid' || status === 'ok' || status === 'awaiting delivery') {
               await upgradeSubscription();
@@ -93,6 +108,7 @@ Deno.serve(async (req: Request) => {
                   headers: { ...corsHeaders, 'Content-Type': 'application/json' }
               });
           } else if (status === 'failed' || status === 'cancelled' || status === 'refused' || status === 'error') {
+              console.log(`[check-subscription] Server-side payment failed/cancelled. Updating status to failed.`);
               await supabase.from('subscriptions').update({ status: 'failed' }).eq('id', subscriptionId);
               return new Response(JSON.stringify({ 
                   status: 'failed', 
@@ -102,10 +118,10 @@ Deno.serve(async (req: Request) => {
               });
           }
         } catch (fetchErr) {
-          console.error('[check-subscription] Server-side fetch failed (possibly blocked by Paynow firewall):', fetchErr);
-          // Don't crash here - return the current cached status from the database instead of failing, 
-          // allowing the client to try proxying if it has connection issues!
+          console.error('[check-subscription] Server-side fetch failed:', fetchErr);
         }
+    } else {
+      console.log(`[check-subscription] No poll_url is set in the subscription record yet.`);
     }
 
     return new Response(JSON.stringify({ status: subscription.status }), {
