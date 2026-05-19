@@ -39,6 +39,17 @@ export const useGoogleAuth = () => {
       }
 
       console.error('Google Sign-In Error:', error);
+      
+      // Check for Google Sign-In Developer Error (Code 10)
+      if (error.code === '10' || error.code === 10 || String(error.code) === '10') {
+        Alert.alert(
+          'Google Configuration Required 🔑',
+          'This is a "DEVELOPER_ERROR" (Code 10).\n\nThis happens because the SHA-1 certificate fingerprint of this specific Android build is not registered in your Google Cloud / Firebase Console.\n\nHow to solve:\n1. Go to your Expo Dashboard -> Chana -> Credentials.\n2. Copy the Android SHA-1 Fingerprint.\n3. Go to Firebase Console -> Project Settings -> Your Android App.\n4. Click "Add Fingerprint", paste the SHA-1 key, and save.\n5. Wait 5 minutes for Google to sync and try signing in again!',
+          [{ text: 'Got it, let me do that!' }]
+        );
+        return;
+      }
+
       if (error.code !== 'ASYNC_OP_IN_PROGRESS') {
         Alert.alert('Sign In Error', error.message || 'Failed to sign in with Google');
       }
