@@ -33,7 +33,7 @@ interface NewMatch {
 
 const DiscoverScreen = () => {
   const theme = useAppTheme();
-  const { user, profile, setProfile } = useAuthStore();
+  const { user, profile, setProfile, fetchProfile } = useAuthStore();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -192,6 +192,9 @@ const DiscoverScreen = () => {
 
   useEffect(() => {
     const initDiscover = async () => {
+      if (user?.id) {
+        await fetchProfile(user.id);
+      }
       await checkDailySwipeReset();
       fetchProfiles();
     };

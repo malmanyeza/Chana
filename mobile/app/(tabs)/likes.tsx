@@ -28,7 +28,7 @@ const ITEM_WIDTH = (width - SPACING.lg * 3) / COLUMN_COUNT;
 export default function LikesScreen() {
   const router = useRouter();
   const theme = useAppTheme();
-  const { user, profile } = useAuthStore();
+  const { user, profile, fetchProfile } = useAuthStore();
   const [likes, setLikes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -69,6 +69,9 @@ export default function LikesScreen() {
   };
 
   useEffect(() => {
+    if (user?.id) {
+      fetchProfile(user.id);
+    }
     fetchLikes();
 
     // Listen for new likes in real-time
