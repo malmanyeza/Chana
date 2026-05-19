@@ -4,7 +4,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { COLORS } from '@/constants/theme';
 
 const Index = () => {
-  const { session, isLoading } = useAuthStore();
+  const { session, profile, isLoading } = useAuthStore();
 
   // While auth state is being resolved, show nothing (splash screen handles it)
   if (isLoading) {
@@ -16,7 +16,11 @@ const Index = () => {
   }
 
   if (session) {
-    return <Redirect href="/(tabs)/discover" />;
+    if (profile?.is_onboarded) {
+      return <Redirect href="/(tabs)/discover" />;
+    } else {
+      return <Redirect href="/(onboarding)/about" />;
+    }
   }
 
   return <Redirect href="/(auth)/welcome" />;
