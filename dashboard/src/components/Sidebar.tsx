@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Users, Settings, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function Sidebar() {
   return (
@@ -38,7 +39,7 @@ export default function Sidebar() {
         <button 
           className="nav-link" 
           style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-          onClick={() => alert('Logout not implemented yet')}
+          onClick={() => supabase.auth.signOut()}
         >
           <LogOut size={20} />
           <span>Sign Out</span>

@@ -17,6 +17,8 @@ import { useAppTheme } from '../../hooks/use-theme-color';
 import { useGoogleAuth } from '../../hooks/use-google-auth';
 import { useAppleAuth } from '../../hooks/use-apple-auth';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const { width, height } = Dimensions.get('window');
@@ -27,6 +29,7 @@ export default function WelcomeScreen() {
   const activeTheme = useColorScheme() ?? 'dark';
   const { signInWithGoogle } = useGoogleAuth();
   const { signInWithApple } = useAppleAuth();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -42,7 +45,7 @@ export default function WelcomeScreen() {
       <View style={[styles.orb, styles.orbTop, { backgroundColor: theme.primary }]} />
       <View style={[styles.orb, styles.orbBottom, { backgroundColor: theme.accent }]} />
 
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         {/* Logo area */}
         <View style={styles.hero}>
           <Image
@@ -54,7 +57,7 @@ export default function WelcomeScreen() {
         </View>
 
         {/* Action area */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 28) }]}>
           <View style={[styles.card, { 
             backgroundColor: activeTheme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(26,26,36,0.9)',
             borderColor: theme.border
@@ -132,19 +135,19 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingTop: height * 0.16,
+    paddingTop: height * 0.08,
   },
   splashIcon: {
-    width: 240,
-    height: 240,
-    marginBottom: SPACING.xl,
+    width: 200,
+    height: 200,
+    marginBottom: SPACING.md,
   },
   tagline: {
     fontFamily: FONTS.body,
     fontSize: 16,
     color: 'rgba(255,255,255,0.5)',
     fontStyle: 'italic',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.sm,
   },
   decorRow: {
     flexDirection: 'row',

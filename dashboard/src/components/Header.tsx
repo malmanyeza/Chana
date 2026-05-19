@@ -68,10 +68,10 @@ export default function Header({ title }: { title: string }) {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-          <div className="avatar-placeholder" style={{ width: 36, height: 36 }}>A</div>
+          <div className="avatar-placeholder" style={{ width: 36, height: 36, backgroundColor: 'rgba(255, 87, 34, 0.15)', color: 'var(--primary)' }}>C</div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 14, fontWeight: 500 }}>Admin User</span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Superadmin</span>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Chana Admin</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>admin@chana.com</span>
           </div>
         </div>
       </div>
