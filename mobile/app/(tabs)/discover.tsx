@@ -65,26 +65,29 @@ const DiscoverScreen = () => {
       const now = new Date();
       const isPremium = isPremiumActive(profile);
 
-      // Reset only if free user AND (lastReset is null or 24 hours have passed)
+      if (isPremium) return;
+
+      // 1. Fetch current dynamic limit from system_settings
+      let limit = 20;
+      const { data: settingData, error: settingError } = await supabase
+        .from('system_settings')
+        .select('value')
+        .eq('key', 'free_swipes_limit')
+        .single();
+
+      if (!settingError && settingData?.value) {
+        limit = parseInt(settingData.value) || 20;
+      }
+
       const twentyFourHours = 24 * 60 * 60 * 1000;
-      if (!isPremium && (!lastReset || (now.getTime() - lastReset.getTime() >= twentyFourHours))) {
-        console.log('🔄 Daily swipes limit expired or never reset. Fetching limit from system_settings...');
-
-        let limit = 20;
-        const { data: settingData, error: settingError } = await supabase
-          .from('system_settings')
-          .select('value')
-          .eq('key', 'free_swipes_limit')
-          .single();
-
-        if (!settingError && settingData?.value) {
-          limit = parseInt(settingData.value) || 20;
-        }
-
-        console.log(`🎯 Applying dynamic daily swipe limit: ${limit} swipes`);
+      const needsFullReset = !lastReset || (now.getTime() - lastReset.getTime() >= twentyFourHours);
+      
+      // If 24 hours have passed, or they have more swipes remaining than the current admin limit, enforce the cap!
+      if (needsFullReset || (profile.swipes_remaining > limit)) {
+        console.log(`🎯 Enforcing dynamic daily swipe limit: ${limit} swipes (Current remaining: ${profile.swipes_remaining}, Needs reset: ${needsFullReset})`);
 
         const newRemaining = limit;
-        const newResetTime = now.toISOString();
+        const newResetTime = needsFullReset ? now.toISOString() : (profile.last_swipe_reset || now.toISOString());
 
         const updatedProfile = {
           ...profile,
