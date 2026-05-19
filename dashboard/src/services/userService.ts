@@ -11,6 +11,8 @@ export interface UserStats {
   pendingLikes: number;
   matches: number;
   joinedAt: string;
+  isPremium: boolean;
+  premiumUntil: string | null;
 }
 
 export interface DashboardMetrics {
@@ -75,7 +77,9 @@ export const fetchDashboardData = async () => {
       totalLikesReceived,
       pendingLikes,
       matches: userMatches,
-      joinedAt: profile.created_at || new Date().toISOString()
+      joinedAt: profile.created_at || new Date().toISOString(),
+      isPremium: !!profile.is_premium,
+      premiumUntil: profile.premium_until || null
     };
   });
 

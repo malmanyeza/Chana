@@ -123,6 +123,7 @@ export default function Users() {
                 <th>Total Likes</th>
                 <th>Pending Likes</th>
                 <th>Matches</th>
+                <th>Subscription</th>
                 <th>Joined</th>
                 <th>Actions</th>
               </tr>
@@ -138,7 +139,24 @@ export default function Users() {
                         <div className="avatar-placeholder">{user.fullName.charAt(0)}</div>
                       )}
                       <div>
-                        <div className="user-name">{user.fullName}</div>
+                        <div className="user-name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {user.fullName}
+                          {user.isPremium && (
+                            <span style={{
+                              backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                              color: '#FFD700',
+                              border: '1px solid rgba(255, 215, 0, 0.4)',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              fontSize: '9px',
+                              fontWeight: 'bold',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
+                            }}>
+                              Gold
+                            </span>
+                          )}
+                        </div>
                         <div className="user-email">{user.id.substring(0, 8)}...</div>
                       </div>
                     </div>
@@ -156,6 +174,29 @@ export default function Users() {
                   <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{user.totalLikesReceived}</td>
                   <td style={{ fontWeight: 600, color: 'var(--accent)' }}>{user.pendingLikes}</td>
                   <td style={{ fontWeight: 600, color: 'var(--success)' }}>{user.matches}</td>
+                  <td>
+                    {user.isPremium ? (
+                      <div>
+                        <span className="badge" style={{ 
+                          backgroundColor: 'rgba(255, 215, 0, 0.15)', 
+                          color: '#FFD700',
+                          border: '1px solid rgba(255, 215, 0, 0.3)',
+                          fontWeight: 'bold'
+                        }}>
+                          Gold Premium
+                        </span>
+                        {user.premiumUntil && (
+                          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                            Expires {new Date(user.premiumUntil).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                        Free Plan
+                      </span>
+                    )}
+                  </td>
                   <td style={{ color: 'var(--text-muted)' }}>
                     {new Date(user.joinedAt).toLocaleDateString()}
                   </td>
@@ -174,7 +215,7 @@ export default function Users() {
               ))}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '32px' }}>
+                  <td colSpan={10} style={{ textAlign: 'center', padding: '32px' }}>
                     No users match your filters.
                   </td>
                 </tr>
