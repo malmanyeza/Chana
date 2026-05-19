@@ -441,45 +441,6 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                         />
                       </View>
                       <Text style={styles.inputHelp}>USSD push will be sent to this number</Text>
-                      
-                      {/* Sandbox Testing Guide with Tap-to-Autofill */}
-                      <View style={[styles.sandboxCard, { backgroundColor: 'rgba(255,193,7,0.06)', borderColor: 'rgba(255,193,7,0.2)' }]}>
-                        <View style={styles.sandboxHeader}>
-                          <Ionicons name="construct-outline" size={16} color="#FFC107" style={{ marginRight: 6 }} />
-                          <Text style={styles.sandboxTitle}>Sandbox Test Numbers (Tap to Auto-fill):</Text>
-                        </View>
-                        <View style={styles.sandboxGrid}>
-                          <TouchableOpacity 
-                            style={styles.sandboxBadge}
-                            onPress={() => setPhone('0771111111')}
-                          >
-                            <Text style={styles.sandboxBadgeText}>0771111111</Text>
-                            <Text style={styles.sandboxBadgeLabel}>Success</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity 
-                            style={styles.sandboxBadge}
-                            onPress={() => setPhone('0772222222')}
-                          >
-                            <Text style={styles.sandboxBadgeText}>0772222222</Text>
-                            <Text style={styles.sandboxBadgeLabel}>Delayed</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity 
-                            style={styles.sandboxBadge}
-                            onPress={() => setPhone('0773333333')}
-                          >
-                            <Text style={styles.sandboxBadgeText}>0773333333</Text>
-                            <Text style={styles.sandboxBadgeLabel}>Cancel</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity 
-                            style={styles.sandboxBadge}
-                            onPress={() => setPhone('0774444444')}
-                          >
-                            <Text style={styles.sandboxBadgeText}>0774444444</Text>
-                            <Text style={styles.sandboxBadgeLabel}>No Funds</Text>
-                          </TouchableOpacity>
-                        </View>
-                        <Text style={styles.sandboxNote}>* Note: In test mode, your Paynow authemail must match your merchant account email.</Text>
-                      </View>
                     </View>
                   )}
 
