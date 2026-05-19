@@ -83,7 +83,7 @@ const MatchesScreen = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel('matches-list')
+      .channel(`matches-list-${user.id}-${Date.now()}`)
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
@@ -159,7 +159,13 @@ const MatchesScreen = () => {
                 <TouchableOpacity
                   key={conv.id}
                   style={[styles.convRow, { borderBottomColor: theme.border }]}
-                  onPress={() => router.push(`/(tabs)/messages/${conv.id}`)}
+                  onPress={() => router.push({
+                    pathname: `/(tabs)/messages/${conv.id}`,
+                    params: {
+                      name: conv.otherUser.full_name,
+                      avatar: conv.otherUser.photos?.[0] || ''
+                    }
+                  })}
                   activeOpacity={0.7}
                 >
                   <TouchableOpacity 

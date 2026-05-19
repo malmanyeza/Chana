@@ -26,13 +26,28 @@ import { useAuthStore } from '../../../stores/authStore';
 import { Message, Match } from '../../../types';
 
 export default function ChatScreen() {
-  const { matchId } = useLocalSearchParams<{ matchId: string }>();
+  const { matchId, name, avatar } = useLocalSearchParams<{ 
+    matchId: string;
+    name?: string;
+    avatar?: string;
+  }>();
   const router = useRouter();
   const theme = useAppTheme();
   const { user } = useAuthStore();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [match, setMatch] = useState<Match | null>(null);
+  const [match, setMatch] = useState<Match | null>(() => {
+    if (name) {
+      return {
+        id: matchId,
+        otherUser: {
+          full_name: name,
+          photos: avatar ? [avatar] : [],
+        }
+      } as any;
+    }
+    return null;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -161,7 +176,7 @@ export default function ChatScreen() {
     }
   };
 
-  if (isLoading || !match) {
+  if (isLoading && !match) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
         <ActivityIndicator size="large" color={theme.primary} />

@@ -268,7 +268,13 @@ export default function ProfileDetailScreen() {
         {isMatched ? (
           <TouchableOpacity 
             style={styles.chatFab}
-            onPress={() => router.push(`/(tabs)/messages/${matchId}`)}
+            onPress={() => router.push({
+              pathname: `/(tabs)/messages/${matchId}`,
+              params: {
+                name: profile.full_name,
+                avatar: profile.photos?.[0] || ''
+              }
+            })}
           >
             <LinearGradient
               colors={COLORS.gradients.warm as [string, string]}
