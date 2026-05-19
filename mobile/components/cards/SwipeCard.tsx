@@ -200,7 +200,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           <View style={styles.topInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.name}>
-                {profile.name}, {profile.age} {profile.country ? profile.country : ''}
+                {profile.name.split(' ')[0]}, {profile.age} {profile.country ? profile.country : ''}
               </Text>
               {profile.isVerified && (
                 <View style={styles.verifyBadge}>
