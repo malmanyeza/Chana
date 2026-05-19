@@ -461,10 +461,10 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                   )}
 
                   <TouchableOpacity 
-                    style={[styles.upgradeButton, loading && { opacity: 0.7 }]} 
-                    activeOpacity={0.8} 
-                    onPress={handleUpgrade}
-                    disabled={loading}
+                    style={[styles.upgradeButton, loading && !isPolling && { opacity: 0.7 }]} 
+                    activeOpacity={0.7} 
+                    onPress={isPolling ? handleCancelPayment : handleUpgrade}
+                    disabled={loading && !isPolling}
                   >
                     <LinearGradient
                       colors={['#FFD700', '#FDB931']}
@@ -474,8 +474,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                     >
                       {loading ? (
                         <View style={styles.loadingRow}>
-                          <ActivityIndicator color="#000" size="small" />
-                          <Text style={styles.upgradeText}>{isPolling ? (paymentMethod === 'ecocash' ? 'Awaiting USSD...' : 'Awaiting Card...') : 'Processing...'}</Text>
+                          <ActivityIndicator color="#000" size="small" style={{ marginRight: 6 }} />
+                          <Text style={styles.upgradeText}>
+                            {isPolling 
+                              ? (paymentMethod === 'ecocash' ? 'Awaiting USSD... (Tap to Cancel)' : 'Awaiting Card... (Tap to Cancel)') 
+                              : 'Processing...'}
+                          </Text>
                         </View>
                       ) : (
                         <Text style={styles.upgradeText}>
