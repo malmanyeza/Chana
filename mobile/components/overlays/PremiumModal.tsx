@@ -167,6 +167,14 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         throw new Error(initParams.get('error') || 'Failed to initiate Paynow transaction.');
       }
 
+      const pollUrl = initParams.get('pollurl') || '';
+      if (pollUrl) {
+        await supabase
+          .from('subscriptions')
+          .update({ poll_url: decodeURIComponent(pollUrl) })
+          .eq('id', subscriptionId);
+      }
+
       if (paymentMethod === 'ecocash') {
         // EcoCash USSD Push
         const pollUrl = initParams.get('pollurl') || '';
