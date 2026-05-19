@@ -38,9 +38,9 @@ Deno.serve(async (req: Request) => {
         const resp = await fetch(subscription.poll_url);
         const text = await resp.text();
         const params = new URLSearchParams(text);
-        const status = params.get('status')?.toLowerCase();
+        const status = params.get('status')?.toLowerCase()?.trim();
 
-        if (status === 'paid' || status === 'ok') {
+        if (status === 'paid' || status === 'ok' || status === 'awaiting delivery') {
             // 1. Update subscription status
             await supabase.from('subscriptions').update({ status: 'paid' }).eq('id', subscriptionId);
             
