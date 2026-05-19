@@ -352,6 +352,37 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
             style={styles.keyboardView}
           >
             <View style={[styles.container, { backgroundColor: theme.card }]}>
+              {isPolling && (
+                <View style={[styles.paymentOverlay, { backgroundColor: 'rgba(0,0,0,0.92)' }]}>
+                  <BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />
+                  <View style={styles.paymentOverlayContent}>
+                    <ActivityIndicator size="large" color="#FFD700" style={{ marginBottom: 20 }} />
+                    <Text style={styles.paymentOverlayTitle}>
+                      {paymentMethod === 'ecocash' ? 'USSD Push Sent!' : 'Processing Card'}
+                    </Text>
+                    <Text style={styles.paymentOverlaySubtitle}>
+                      {paymentMethod === 'ecocash' 
+                        ? 'Please check your phone screen for the EcoCash PIN prompt to authorize the $0.10 payment.'
+                        : 'Please authorize the transaction in the secure browser window.'}
+                    </Text>
+                    
+                    <View style={styles.spinnerPulseContainer}>
+                      <ActivityIndicator size="small" color="#FFD700" style={{ marginRight: 8 }} />
+                      <Text style={styles.paymentOverlayWait}>Awaiting payment response...</Text>
+                    </View>
+                    
+                    <TouchableOpacity 
+                      style={styles.overlayCancelBtn} 
+                      onPress={handleCancelPayment}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="close-circle-outline" size={18} color="#FF5A5F" style={{ marginRight: 6 }} />
+                      <Text style={styles.overlayCancelText}>Cancel Payment Request</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
               <TouchableOpacity style={styles.closeButton} onPress={onClose} disabled={loading}>
                 <Ionicons name="close" size={24} color="#FFF" />
               </TouchableOpacity>
@@ -471,10 +502,10 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                     >
-                      {loading ? (
+                      {loading && !isPolling ? (
                         <View style={styles.loadingRow}>
                           <ActivityIndicator color="#000" size="small" />
-                          <Text style={styles.upgradeText}>{isPolling ? (paymentMethod === 'ecocash' ? 'Awaiting USSD...' : 'Awaiting Card...') : 'Processing...'}</Text>
+                          <Text style={styles.upgradeText}>Processing...</Text>
                         </View>
                       ) : (
                         <Text style={styles.upgradeText}>
@@ -483,17 +514,6 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                       )}
                     </LinearGradient>
                   </TouchableOpacity>
-
-                  {isPolling && (
-                    <TouchableOpacity 
-                      style={styles.cancelPaymentBtn}
-                      onPress={handleCancelPayment}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="close-circle-outline" size={16} color="#FF5A5F" style={{ marginRight: 6 }} />
-                      <Text style={styles.cancelPaymentText}>Cancel Payment Request</Text>
-                    </TouchableOpacity>
-                  )}
 
                   <Text style={styles.footerNote}>Recurring billing. Cancel anytime.</Text>
 
@@ -864,20 +884,60 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     marginTop: 2,
   },
-  cancelPaymentBtn: {
+  paymentOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    borderRadius: BORDER_RADIUS.xl,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paymentOverlayContent: {
+    width: '90%',
+    alignItems: 'center',
+    padding: 24,
+  },
+  paymentOverlayTitle: {
+    fontFamily: FONTS.h2,
+    fontSize: 22,
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  paymentOverlaySubtitle: {
+    fontFamily: FONTS.body,
+    fontSize: 14,
+    color: '#E5E5EA',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 32,
+  },
+  spinnerPulseContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 90, 95, 0.2)',
-    backgroundColor: 'rgba(255, 90, 95, 0.05)',
+    marginBottom: 40,
   },
-  cancelPaymentText: {
+  paymentOverlayWait: {
     fontFamily: FONTS.bodyBold,
     fontSize: 13,
+    color: '#FFD700',
+  },
+  overlayCancelBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 90, 95, 0.3)',
+    backgroundColor: 'rgba(255, 90, 95, 0.08)',
+    width: '100%',
+  },
+  overlayCancelText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 14,
     color: '#FF5A5F',
   }
 });
