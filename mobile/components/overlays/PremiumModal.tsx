@@ -41,6 +41,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
   const [phone, setPhone] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [isPolling, setIsPolling] = React.useState(false);
+  const [activeSubscriptionId, setActiveSubscriptionId] = React.useState<string | null>(null);
   const scrollRef = React.useRef<ScrollView>(null);
   const pollingIntervalRef = React.useRef<any>(null);
 
@@ -240,6 +241,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         }
 
         setIsPolling(true);
+        setActiveSubscriptionId(subscriptionId);
         startPolling(subscriptionId);
       } else {
         // Visa/Mastercard Standard Checkout
@@ -247,6 +249,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         if (!browserUrl) throw new Error('No browser URL returned from Paynow.');
 
         setIsPolling(true);
+        setActiveSubscriptionId(subscriptionId);
         startPolling(subscriptionId);
         
         // Open in-app browser
@@ -266,8 +269,89 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
       pollingIntervalRef.current = null;
     }
     setIsPolling(false);
+    setActiveSubscriptionId(null);
     setLoading(false);
     Alert.alert('Payment Cancelled', 'You cancelled the payment process.');
+  };
+
+  const checkPaymentStatusManually = async (subscriptionId: string) => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // 1. Fetch subscription details to get poll_url
+      const { data: subRecord, error: subError } = await supabase
+        .from('subscriptions')
+        .select('poll_url')
+        .eq('id', subscriptionId)
+        .single();
+
+      if (subError || !subRecord) {
+        throw new Error("Could not find subscription record in database.");
+      }
+
+      let rawPaynowResponse = null;
+
+      // 2. Fetch the poll URL directly from the client (mobile device)
+      if (subRecord.poll_url) {
+        try {
+          const paynowResp = await fetch(subRecord.poll_url);
+          const paynowText = await paynowResp.text();
+          if (paynowText && paynowText.includes('status=')) {
+            rawPaynowResponse = paynowText;
+          }
+        } catch (clientFetchErr) {
+          console.warn('[PremiumModal] Manual fetch of poll_url failed:', clientFetchErr);
+        }
+      }
+
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/check-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+          'apikey': supabase.supabaseAnonKey,
+        },
+        body: JSON.stringify({ subscriptionId, rawPaynowResponse })
+      });
+
+      const resData = await response.json();
+      
+      if (resData.error) {
+        throw new Error(resData.error);
+      }
+
+      const status = resData.status;
+
+      if (status === 'paid') {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        setIsPolling(false);
+        setActiveSubscriptionId(null);
+        setLoading(false);
+        
+        // 1. Refresh Zustand profile
+        if (user?.id) {
+          fetchProfile(user.id);
+        }
+        
+        // 2. Close modal
+        onClose();
+        
+        Alert.alert('Chana Gold Premium Active!', 'Thank you! Your payment was successfully confirmed, and Chana Gold is now fully active on your profile.');
+      } else {
+        Alert.alert(
+          'Payment Pending', 
+          'Paynow shows your payment is still pending. If you just entered your PIN, please wait a few seconds and try clicking "Check Status Now" again.'
+        );
+        setLoading(false);
+      }
+    } catch (error: any) {
+      Alert.alert('Status Check Error', error.message);
+      setLoading(false);
+    }
   };
 
   const startPolling = (subscriptionId: string) => {
@@ -279,12 +363,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
     const interval = setInterval(async () => {
       attempts++;
-      if (attempts > 20) { // Timeout after 1 minute
+      if (attempts > 60) { // Timeout after 5 minutes
         clearInterval(interval);
         pollingIntervalRef.current = null;
         setIsPolling(false);
         setLoading(false);
-        Alert.alert('Timeout', 'We are still waiting for payment. It will be updated automatically once processed.');
+        Alert.alert('Timeout', 'We are still waiting for your payment. Click "Check Status Now" to check again, or check later.');
         return;
       }
 
@@ -340,6 +424,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           clearInterval(interval);
           pollingIntervalRef.current = null;
           setIsPolling(false);
+          setActiveSubscriptionId(null);
           setLoading(false);
           
           // 1. Refresh profile state in Zustand so the gold badge displays instantly
@@ -356,6 +441,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           clearInterval(interval);
           pollingIntervalRef.current = null;
           setIsPolling(false);
+          setActiveSubscriptionId(null);
           setLoading(false);
           Alert.alert('Payment Failed', resData.error || 'The payment transaction failed or was cancelled.');
         }
@@ -367,7 +453,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         setLoading(false);
         Alert.alert('Connection Error', 'Unable to check payment status. Please try again.');
       }
-    }, 3000);
+    }, 5000);
 
     pollingIntervalRef.current = interval;
   };
@@ -545,14 +631,26 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                   </TouchableOpacity>
 
                   {isPolling && (
-                    <TouchableOpacity 
-                      style={styles.cancelPaymentBtn}
-                      onPress={handleCancelPayment}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="close-circle" size={15} color="#FF3B30" style={{ marginRight: 6 }} />
-                      <Text style={styles.cancelPaymentText}>Cancel Payment Request</Text>
-                    </TouchableOpacity>
+                    <View style={styles.pollingActionsRow}>
+                      <TouchableOpacity 
+                        style={styles.checkStatusBtn}
+                        onPress={() => activeSubscriptionId && checkPaymentStatusManually(activeSubscriptionId)}
+                        activeOpacity={0.7}
+                        disabled={loading && !isPolling}
+                      >
+                        <Ionicons name="refresh-circle" size={18} color="#FFD700" style={{ marginRight: 6 }} />
+                        <Text style={styles.checkStatusText}>Check Status Now</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity 
+                        style={styles.cancelPaymentBtn}
+                        onPress={handleCancelPayment}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="close-circle" size={15} color="#FF3B30" style={{ marginRight: 6 }} />
+                        <Text style={styles.cancelPaymentText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
 
                   <Text style={styles.footerNote}>Recurring billing. Cancel anytime.</Text>
@@ -937,14 +1035,44 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     marginTop: 2,
   },
-  cancelPaymentBtn: {
+  pollingActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center', // Centered Pill Shape
+    gap: 12,
     marginTop: 16,
+    width: '100%',
+  },
+  checkStatusBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    borderRadius: 22,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 215, 0, 0.4)',
+    backgroundColor: 'rgba(255, 215, 0, 0.08)',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  checkStatusText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 13,
+    color: '#FFD700',
+    letterSpacing: 0.4,
+  },
+  cancelPaymentBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 22,
     borderWidth: 1.2,
     borderColor: 'rgba(255, 59, 48, 0.3)',
@@ -953,7 +1081,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 5,
-    elevation: 3, // Premium soft glow shadow for Android
+    elevation: 3,
   },
   cancelPaymentText: {
     fontFamily: FONTS.bodyBold,
