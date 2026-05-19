@@ -17,6 +17,9 @@ const Index = () => {
   }
 
   if (session) {
+    if (session.user?.email === 'admin@chana.com') {
+      return <Redirect href="/admin" />;
+    }
     if (profile?.is_onboarded) {
       return <Redirect href="/(tabs)/discover" />;
     } else {

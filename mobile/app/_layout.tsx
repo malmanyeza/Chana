@@ -157,20 +157,26 @@ export default function RootLayout() {
   useEffect(() => {
     // Wait for fonts AND auth/profile loading to finish before redirecting
     // CRITICAL: If we have a session, we MUST wait for the profile to load 
-    // to avoid flickering to the onboarding screen.
-    if (isSeeding || !loaded || isLoading || (session && !profile)) return;
+    // to avoid flickering to the onboarding screen (unless we are admin).
+    const isAdmin = session?.user?.email === 'admin@chana.com';
+    if (isSeeding || !loaded || isLoading || (session && !profile && !isAdmin)) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
-    const inTabsGroup = segments[0] === '(tabs)';
+    const inAdminGroup = segments[0] === 'admin';
 
     if (!session) {
       // Not logged in: force to auth group if not already there
       if (!inAuthGroup) {
         router.replace('/(auth)/welcome');
       }
+    } else if (isAdmin) {
+      // Admin: force to admin index if not already in admin group
+      if (!inAdminGroup) {
+        router.replace('/admin');
+      }
     } else {
-      // Logged in: check onboarding status
+      // Logged in normal user: check onboarding status
       if (profile?.is_onboarded) {
         // Onboarded: force to tabs if in auth or onboarding
         if (inAuthGroup || inOnboardingGroup || segments.length === 0) {
