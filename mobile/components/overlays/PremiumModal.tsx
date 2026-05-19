@@ -35,7 +35,7 @@ interface PremiumModalProps {
 
 export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumModalProps) => {
   const theme = useAppTheme();
-  const { profile } = useAuthStore();
+  const { user, profile, fetchProfile } = useAuthStore();
   const [selectedPlan, setSelectedPlan] = React.useState<'weekly' | 'monthly'>('monthly');
   const [paymentMethod, setPaymentMethod] = React.useState<'ecocash' | 'card'>('ecocash');
   const [phone, setPhone] = React.useState('');
@@ -314,9 +314,17 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           pollingIntervalRef.current = null;
           setIsPolling(false);
           setLoading(false);
-          Alert.alert('Success!', 'Welcome to Chana Gold! Your premium features are now unlocked.', [
-            { text: 'Great!', onPress: onClose }
-          ]);
+          
+          // 1. Refresh profile state in Zustand so the gold badge displays instantly
+          if (user?.id) {
+            fetchProfile(user.id);
+          }
+          
+          // 2. Dismiss the premium modal instantly
+          onClose();
+          
+          // 3. Show clean success confirmation alert
+          Alert.alert('Success!', 'Welcome to Chana Gold! Your premium features are now unlocked.');
         } else if (status === 'failed' || status === 'cancelled') {
           clearInterval(interval);
           pollingIntervalRef.current = null;
