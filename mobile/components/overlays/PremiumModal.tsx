@@ -489,9 +489,9 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                     <TouchableOpacity 
                       style={styles.cancelPaymentBtn}
                       onPress={handleCancelPayment}
-                      activeOpacity={0.8}
+                      activeOpacity={0.7}
                     >
-                      <Ionicons name="close-circle-outline" size={16} color="#FF5A5F" style={{ marginRight: 6 }} />
+                      <Ionicons name="close-circle" size={15} color="#FF3B30" style={{ marginRight: 6 }} />
                       <Text style={styles.cancelPaymentText}>Cancel Payment Request</Text>
                     </TouchableOpacity>
                   )}
@@ -869,16 +869,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 90, 95, 0.2)',
-    backgroundColor: 'rgba(255, 90, 95, 0.05)',
+    alignSelf: 'center', // Centered Pill Shape
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 22,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 59, 48, 0.3)',
+    backgroundColor: 'rgba(255, 59, 48, 0.07)',
+    shadowColor: '#FF3B30',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+    elevation: 3, // Premium soft glow shadow for Android
   },
   cancelPaymentText: {
     fontFamily: FONTS.bodyBold,
     fontSize: 13,
-    color: '#FF5A5F',
+    color: '#FF3B30',
+    letterSpacing: 0.4,
   }
 });
