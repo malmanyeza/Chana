@@ -50,8 +50,6 @@ export default function WelcomeScreen() {
             style={styles.splashIcon}
             resizeMode="contain"
           />
-
-          <Text style={[styles.appName, { color: theme.text }]}>Chana</Text>
           <Text style={[styles.tagline, { color: theme.textMuted }]}>Every connection starts with one.</Text>
         </View>
 
@@ -134,18 +132,12 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingTop: height * 0.1,
+    paddingTop: height * 0.16,
   },
   splashIcon: {
-    width: 135,
-    height: 135,
-    marginBottom: SPACING.md,
-  },
-  appName: {
-    fontFamily: FONTS.display,
-    fontSize: 56,
-    color: '#FFFFFF',
-    marginBottom: SPACING.sm,
+    width: 240,
+    height: 240,
+    marginBottom: SPACING.xl,
   },
   tagline: {
     fontFamily: FONTS.body,
