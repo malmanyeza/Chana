@@ -296,6 +296,16 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         });
 
         const resData = await response.json();
+        
+        if (resData.error) {
+          clearInterval(interval);
+          pollingIntervalRef.current = null;
+          setIsPolling(false);
+          setLoading(false);
+          Alert.alert('Payment Failed', resData.error);
+          return;
+        }
+
         const status = resData.status;
 
         if (status === 'paid') {
@@ -315,6 +325,11 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         }
       } catch (err) {
         console.log('Polling error:', err);
+        clearInterval(interval);
+        pollingIntervalRef.current = null;
+        setIsPolling(false);
+        setLoading(false);
+        Alert.alert('Connection Error', 'Unable to check payment status. Please try again.');
       }
     }, 3000);
 
