@@ -42,12 +42,18 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
   const [loading, setLoading] = React.useState(false);
   const [isPolling, setIsPolling] = React.useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+  const pollingIntervalRef = React.useRef<any>(null);
 
   React.useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
       scrollRef.current?.scrollToEnd({ animated: true });
     });
-    return () => showSubscription.remove();
+    return () => {
+      showSubscription.remove();
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
   }, []);
 
   const getTitle = () => {
@@ -249,12 +255,28 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
     }
   };
 
+  const handleCancelPayment = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    setIsPolling(false);
+    setLoading(false);
+    Alert.alert('Payment Cancelled', 'You cancelled the payment process.');
+  };
+
   const startPolling = (subscriptionId: string) => {
     let attempts = 0;
+    
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
     const interval = setInterval(async () => {
       attempts++;
       if (attempts > 20) { // Timeout after 1 minute
         clearInterval(interval);
+        pollingIntervalRef.current = null;
         setIsPolling(false);
         setLoading(false);
         Alert.alert('Timeout', 'We are still waiting for payment. It will be updated automatically once processed.');
@@ -278,6 +300,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
         if (status === 'paid') {
           clearInterval(interval);
+          pollingIntervalRef.current = null;
           setIsPolling(false);
           setLoading(false);
           Alert.alert('Success!', 'Welcome to Chana Gold! Your premium features are now unlocked.', [
@@ -285,6 +308,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           ]);
         } else if (status === 'failed' || status === 'cancelled') {
           clearInterval(interval);
+          pollingIntervalRef.current = null;
           setIsPolling(false);
           setLoading(false);
           Alert.alert('Payment Failed', resData.error || 'The payment transaction failed or was cancelled.');
@@ -293,6 +317,8 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
         console.log('Polling error:', err);
       }
     }, 3000);
+
+    pollingIntervalRef.current = interval;
   };
 
   return (
@@ -481,6 +507,17 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                       )}
                     </LinearGradient>
                   </TouchableOpacity>
+
+                  {isPolling && (
+                    <TouchableOpacity 
+                      style={styles.cancelPaymentBtn}
+                      onPress={handleCancelPayment}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="close-circle-outline" size={16} color="#FF5A5F" style={{ marginRight: 6 }} />
+                      <Text style={styles.cancelPaymentText}>Cancel Payment Request</Text>
+                    </TouchableOpacity>
+                  )}
 
                   <Text style={styles.footerNote}>Recurring billing. Cancel anytime.</Text>
 
@@ -850,5 +887,21 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     lineHeight: 12,
     marginTop: 2,
+  },
+  cancelPaymentBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 90, 95, 0.2)',
+    backgroundColor: 'rgba(255, 90, 95, 0.05)',
+  },
+  cancelPaymentText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 13,
+    color: '#FF5A5F',
   }
 });
