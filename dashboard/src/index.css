@@ -26,6 +26,16 @@
   --transition-fast: 0.2s ease;
 }
 
+:root.light-theme {
+  --bg-main: #F4F6FA;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFD;
+  --border-color: #E2E8F0;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --glass-bg: rgba(255, 255, 255, 0.75);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

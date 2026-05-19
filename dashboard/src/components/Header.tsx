@@ -1,7 +1,25 @@
-import React from 'react';
-import { Search, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Bell, Sun, Moon } from 'lucide-react';
 
 export default function Header({ title }: { title: string }) {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved as 'light' | 'dark') || 'dark';
+  });
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   return (
     <header className="header">
       <h1 className="header-title">{title}</h1>
@@ -23,6 +41,26 @@ export default function Header({ title }: { title: string }) {
             }} 
           />
         </div>
+
+        <button 
+          onClick={toggleTheme}
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all var(--transition-fast)',
+            outline: 'none',
+          }}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
         
         <div style={{ position: 'relative', cursor: 'pointer' }}>
           <Bell size={20} color="var(--text-muted)" />
