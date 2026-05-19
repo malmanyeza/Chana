@@ -30,7 +30,6 @@ const Index = () => {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
