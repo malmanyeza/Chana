@@ -82,24 +82,18 @@ export const SwipeLimitModal = ({ visible, onClose, onUnlockPremium, resetAt }: 
             </LinearGradient>
           </View>
 
-          {/* Top Decorative Icon */}
+          {/* Top Decorative Countdown Pill */}
           <LinearGradient
             colors={['#FF4D6D', '#FF9A3C']}
-            style={styles.iconCircle}
+            style={styles.timerPill}
           >
-            <Ionicons name="sparkles" size={32} color="#FFF" />
+            <Ionicons name="time" size={26} color="#FFF" style={{ marginRight: 8 }} />
+            <Text style={styles.timerPillText}>{timeLeft}</Text>
           </LinearGradient>
 
           {/* Title & Subtitle */}
           <Text style={[styles.title, { color: theme.text }]}>Unlock Unlimited Swipes</Text>
           
-          {/* Countdown Clock Display */}
-          <View style={[styles.timerContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
-            <Ionicons name="time-outline" size={16} color="#FF9A3C" style={{ marginRight: 6 }} />
-            <Text style={[styles.timerLabel, { color: theme.textMuted }]}>Free swipes refill in: </Text>
-            <Text style={styles.timerText}>{timeLeft}</Text>
-          </View>
-
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>
             You've hit your daily free swiping limit. Upgrade to Chana Gold to get unlimited connections and start matching!
           </Text>
@@ -203,12 +197,14 @@ const styles = StyleSheet.create({
     color: '#000',
     letterSpacing: 0.5,
   },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  timerPill: {
+    minWidth: 170,
+    height: 64,
+    borderRadius: 32,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 22,
     marginTop: SPACING.xs,
     marginBottom: SPACING.md,
     shadowColor: '#FF4D6D',
@@ -216,6 +212,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 6,
+  },
+  timerPillText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 22,
+    color: '#FFF',
+    letterSpacing: 1.2,
   },
   title: {
     fontFamily: FONTS.display,
@@ -231,27 +233,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: SPACING.lg,
     paddingHorizontal: 6,
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 154, 60, 0.15)',
-    marginBottom: SPACING.md,
-  },
-  timerLabel: {
-    fontFamily: FONTS.body,
-    fontSize: 12.5,
-  },
-  timerText: {
-    fontFamily: FONTS.bodyBold,
-    fontSize: 13.5,
-    color: '#FF9A3C',
-    letterSpacing: 0.5,
   },
   perksContainer: {
     width: '100%',
