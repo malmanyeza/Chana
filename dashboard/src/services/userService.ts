@@ -20,6 +20,7 @@ export interface DashboardMetrics {
   totalMatches: number;
   totalLikes: number;
   activeUsers: number;
+  paidUsers: number;
 }
 
 export const fetchDashboardData = async () => {
@@ -91,7 +92,8 @@ export const fetchDashboardData = async () => {
     totalUsers: users.length,
     totalMatches: matches?.length || 0,
     totalLikes: swipes?.length || 0,
-    activeUsers: users.length // Simplify for now
+    activeUsers: users.length, // Simplify for now
+    paidUsers: users.filter(u => u.isPremium).length
   };
 
   return { users, metrics };

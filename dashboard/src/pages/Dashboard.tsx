@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Heart, MessageCircle, Activity } from 'lucide-react';
+import { Users, Heart, MessageCircle, Activity, Crown } from 'lucide-react';
 import { fetchDashboardData } from '../services/userService';
 import type { DashboardMetrics, UserStats } from '../services/userService';
 
@@ -72,6 +72,15 @@ export default function Dashboard() {
           <div className="stat-info">
             <h3>Total Matches</h3>
             <p>{metrics.totalMatches}</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(245, 196, 0, 0.1)', color: '#F5C400' }}>
+            <Crown size={24} />
+          </div>
+          <div className="stat-info">
+            <h3>Gold / Paid Users</h3>
+            <p>{metrics.paidUsers}</p>
           </div>
         </div>
         <div className="stat-card">
