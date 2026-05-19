@@ -62,6 +62,16 @@ Deno.serve(async (req: Request) => {
             return new Response(JSON.stringify({ status: 'paid' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
+        } else if (status === 'failed' || status === 'cancelled' || status === 'refused') {
+            // Update DB status to failed
+            await supabase.from('subscriptions').update({ status: 'failed' }).eq('id', subscriptionId);
+            
+            return new Response(JSON.stringify({ 
+                status: 'failed', 
+                error: params.get('error') || 'Transaction failed or was cancelled.' 
+            }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
     }
 

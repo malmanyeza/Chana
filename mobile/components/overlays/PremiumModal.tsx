@@ -273,7 +273,9 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           body: JSON.stringify({ subscriptionId })
         });
 
-        const { status } = await response.json();
+        const resData = await response.json();
+        const status = resData.status;
+
         if (status === 'paid') {
           clearInterval(interval);
           setIsPolling(false);
@@ -281,6 +283,11 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           Alert.alert('Success!', 'Welcome to Chana Gold! Your premium features are now unlocked.', [
             { text: 'Great!', onPress: onClose }
           ]);
+        } else if (status === 'failed' || status === 'cancelled') {
+          clearInterval(interval);
+          setIsPolling(false);
+          setLoading(false);
+          Alert.alert('Payment Failed', resData.error || 'The payment transaction failed or was cancelled.');
         }
       } catch (err) {
         console.log('Polling error:', err);
