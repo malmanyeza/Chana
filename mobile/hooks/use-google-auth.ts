@@ -18,6 +18,7 @@ export const useGoogleAuth = () => {
       if (!idToken) {
         // Log the full object to see if it's a cancellation disguised as a success
         console.log('Missing ID Token. Full response:', JSON.stringify(userInfo, null, 2));
+        setLoading(false);
         return; // Just stop here instead of throwing an error
       }
 
@@ -30,6 +31,7 @@ export const useGoogleAuth = () => {
       
       return data;
     } catch (error: any) {
+      setLoading(false);
       // If the user cancelled, we just stop without showing an error alert
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('User cancelled Google Sign-In');
@@ -40,8 +42,6 @@ export const useGoogleAuth = () => {
       if (error.code !== 'ASYNC_OP_IN_PROGRESS') {
         Alert.alert('Sign In Error', error.message || 'Failed to sign in with Google');
       }
-    } finally {
-      setLoading(false);
     }
   };
 

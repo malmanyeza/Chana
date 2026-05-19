@@ -40,6 +40,7 @@ export default function PreferencesOnboarding() {
   const handleFinish = async () => {
     if (!user) return;
     setLoading(true);
+    useAuthStore.getState().setLoading(true); // Instantly show full-screen auth loading screen
     try {
       // 1. Upload all local photos first and get their public URLs
       const uploadedUrls = await Promise.all(
@@ -80,8 +81,10 @@ export default function PreferencesOnboarding() {
 
       // 3. Navigate immediately
       await fetchProfile(user.id);
+      useAuthStore.getState().setLoading(false); // Close loading screen to render Discover
       router.replace('/(tabs)/discover');
     } catch (error: any) {
+      useAuthStore.getState().setLoading(false); // Reset loading on error
       Alert.alert('Error', error.message);
     } finally {
       setLoading(false);

@@ -33,12 +33,11 @@ export const useAppleAuth = () => {
         throw new Error('No identity token found from Apple');
       }
     } catch (error: any) {
+      setLoading(false);
       if (error.code !== 'ERR_CANCELED') {
         console.error('Apple Sign-In Error:', error);
         Alert.alert('Sign In Error', error.message || 'Failed to sign in with Apple');
       }
-    } finally {
-      setLoading(false);
     }
   };
 
