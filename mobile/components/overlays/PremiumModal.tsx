@@ -176,10 +176,14 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
       const pollUrl = initParams.get('pollurl') || '';
       if (pollUrl) {
-        await supabase
+        const { error: updateError } = await supabase
           .from('subscriptions')
           .update({ poll_url: decodeURIComponent(pollUrl) })
           .eq('id', subscriptionId);
+        
+        if (updateError) {
+          console.error('[PremiumModal] Error saving poll_url in database:', updateError);
+        }
       }
 
       if (paymentMethod === 'ecocash') {
