@@ -1,16 +1,17 @@
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { COLORS } from '@/constants/theme';
+import { useAppTheme } from '@/hooks/use-theme-color';
 
 const Index = () => {
   const { session, profile, isLoading } = useAuthStore();
+  const theme = useAppTheme();
 
   // While auth state is being resolved, show nothing (splash screen handles it)
   if (isLoading) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={[styles.loading, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
