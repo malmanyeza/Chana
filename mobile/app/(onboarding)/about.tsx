@@ -17,13 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useOnboardingStore } from '../../stores/onboardingStore';
 import { useAppTheme } from '../../hooks/use-theme-color';
 import { useAuthStore } from '../../stores/authStore';
-import { useThemeStore } from '../../stores/themeStore';
 
 export default function NameOnboarding() {
   const router = useRouter();
   const theme = useAppTheme();
-  const activeTheme = useThemeStore((state) => state.theme);
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { data, updateData } = useOnboardingStore();
   const { signOut } = useAuthStore();
 
@@ -49,19 +46,9 @@ export default function NameOnboarding() {
         >
           <Ionicons name="chevron-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: SPACING.md, marginRight: SPACING.md }}>
+        <View style={{ flex: 1, marginLeft: SPACING.md }}>
           <ProgressBar progress={0.12} label="Step 1 of 8" />
         </View>
-        <TouchableOpacity 
-          onPress={toggleTheme} 
-          style={[styles.backButton, { backgroundColor: theme.card, borderColor: theme.border }]}
-        >
-          <Ionicons 
-            name={activeTheme === 'light' ? 'moon-outline' : 'sunny-outline'} 
-            size={20} 
-            color={theme.text} 
-          />
-        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingWrapper contentContainerStyle={styles.content}>

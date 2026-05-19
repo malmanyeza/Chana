@@ -17,15 +17,14 @@ import { useAppTheme } from '../../hooks/use-theme-color';
 import { useGoogleAuth } from '../../hooks/use-google-auth';
 import { useAppleAuth } from '../../hooks/use-apple-auth';
 
-import { useThemeStore } from '../../stores/themeStore';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const { width, height } = Dimensions.get('window');
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const theme = useAppTheme();
-  const activeTheme = useThemeStore((state) => state.theme);
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const activeTheme = useColorScheme() ?? 'dark';
   const { signInWithGoogle } = useGoogleAuth();
   const { signInWithApple } = useAppleAuth();
 
@@ -38,31 +37,6 @@ export default function WelcomeScreen() {
           : ['#0F0F14', '#1A0A10', '#0F0F14']}
         style={StyleSheet.absoluteFillObject}
       />
-
-      {/* Floating Theme Toggle in Top Right */}
-      <TouchableOpacity 
-        onPress={toggleTheme}
-        style={{
-          position: 'absolute',
-          top: 60,
-          right: 24,
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-          backgroundColor: theme.card,
-          borderWidth: 1,
-          borderColor: theme.border,
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 10,
-        }}
-      >
-        <Ionicons 
-          name={activeTheme === 'light' ? 'moon-outline' : 'sunny-outline'} 
-          size={22} 
-          color={theme.text} 
-        />
-      </TouchableOpacity>
 
       {/* Glowing orbs */}
       <View style={[styles.orb, styles.orbTop, { backgroundColor: theme.primary }]} />

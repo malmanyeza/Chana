@@ -18,7 +18,6 @@ import { KeyboardAvoidingWrapper } from '../../components/ui/KeyboardAvoidingWra
 import { supabase } from '../../lib/supabase';
 import { useAppTheme } from '../../hooks/use-theme-color';
 import { useGoogleAuth } from '../../hooks/use-google-auth';
-import { useThemeStore } from '../../stores/themeStore';
 
 const { height } = Dimensions.get('window');
 
@@ -36,8 +35,6 @@ function validatePassword(password: string): string | undefined {
 export default function LoginScreen() {
   const router = useRouter();
   const theme = useAppTheme();
-  const activeTheme = useThemeStore((state) => state.theme);
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { signInWithGoogle } = useGoogleAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -98,24 +95,12 @@ export default function LoginScreen() {
       />
 
       <KeyboardAvoidingWrapper contentContainerStyle={styles.content}>
-        {/* Navigation row */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: SPACING.md, marginBottom: SPACING.sm }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <Ionicons name="chevron-back" size={22} color={theme.text} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleTheme}>
-            <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <Ionicons 
-                name={activeTheme === 'light' ? 'moon-outline' : 'sunny-outline'} 
-                size={20} 
-                color={theme.text} 
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
+        {/* Back button */}
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Ionicons name="chevron-back" size={22} color={theme.text} />
+          </View>
+        </TouchableOpacity>
 
         {/* Header */}
         <View style={styles.header}>
