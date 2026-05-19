@@ -1,11 +1,11 @@
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeStore } from '../stores/themeStore';
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme() ?? 'dark';
+  const theme = useThemeStore((state) => state.theme);
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -16,6 +16,6 @@ export function useThemeColor(
 }
 
 export function useAppTheme() {
-  const theme = useColorScheme() ?? 'dark';
+  const theme = useThemeStore((state) => state.theme);
   return Colors[theme];
 }

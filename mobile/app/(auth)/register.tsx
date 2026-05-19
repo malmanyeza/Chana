@@ -15,6 +15,7 @@ import { Button } from '../../components/ui/Button';
 import { KeyboardAvoidingWrapper } from '../../components/ui/KeyboardAvoidingWrapper';
 import { supabase } from '../../lib/supabase';
 import { useAppTheme } from '../../hooks/use-theme-color';
+import { useThemeStore } from '../../stores/themeStore';
 
 function validateEmail(email: string): string | undefined {
   if (!email.trim()) return 'Email is required';
@@ -30,6 +31,8 @@ function validatePassword(password: string): string | undefined {
 export default function RegisterScreen() {
   const router = useRouter();
   const theme = useAppTheme();
+  const activeTheme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -109,11 +112,24 @@ export default function RegisterScreen() {
       />
 
       <KeyboardAvoidingWrapper contentContainerStyle={styles.content}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Ionicons name="chevron-back" size={22} color={theme.text} />
-          </View>
-        </TouchableOpacity>
+        {/* Navigation row */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: SPACING.md, marginBottom: SPACING.sm }}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Ionicons name="chevron-back" size={22} color={theme.text} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={toggleTheme}>
+            <View style={[styles.backCircle, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Ionicons 
+                name={activeTheme === 'light' ? 'moon-outline' : 'sunny-outline'} 
+                size={20} 
+                color={theme.text} 
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.header}>
           <Text style={[styles.greeting, { color: theme.accent }]}>Start your journey</Text>
