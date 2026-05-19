@@ -45,18 +45,11 @@ export default function WelcomeScreen() {
       <SafeAreaView style={styles.safe}>
         {/* Logo area */}
         <View style={styles.hero}>
-          <View style={[styles.logoRing, { shadowColor: theme.primary }]}>
-            <LinearGradient
-              colors={COLORS.gradients.warm}
-              style={styles.logoGradient}
-            >
-              <Image
-                source={require('../../assets/images/logo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </LinearGradient>
-          </View>
+          <Image
+            source={require('../../assets/images/splash-icon.png')}
+            style={styles.splashIcon}
+            resizeMode="contain"
+          />
 
           <Text style={[styles.appName, { color: theme.text }]}>Chana</Text>
           <Text style={[styles.tagline, { color: theme.textMuted }]}>Every connection starts with one.</Text>
@@ -143,27 +136,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: height * 0.1,
   },
-  logoRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    padding: 3,
-    marginBottom: SPACING.lg,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  logoGradient: {
-    flex: 1,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 60,
-    height: 60,
+  splashIcon: {
+    width: 135,
+    height: 135,
+    marginBottom: SPACING.md,
   },
   appName: {
     fontFamily: FONTS.display,
