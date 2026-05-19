@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,30 +17,61 @@ import { useAppTheme } from '../../hooks/use-theme-color';
 import { useGoogleAuth } from '../../hooks/use-google-auth';
 import { useAppleAuth } from '../../hooks/use-apple-auth';
 
+import { useThemeStore } from '../../stores/themeStore';
+
 const { width, height } = Dimensions.get('window');
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const theme = useAppTheme();
+  const activeTheme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { signInWithGoogle } = useGoogleAuth();
   const { signInWithApple } = useAppleAuth();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Full background gradient */}
       <LinearGradient
-        colors={['#0F0F14', '#1A0A10', '#0F0F14']}
+        colors={activeTheme === 'light' 
+          ? ['#FAFAFA', '#FFEBF0', '#FAFAFA'] 
+          : ['#0F0F14', '#1A0A10', '#0F0F14']}
         style={StyleSheet.absoluteFillObject}
       />
 
+      {/* Floating Theme Toggle in Top Right */}
+      <TouchableOpacity 
+        onPress={toggleTheme}
+        style={{
+          position: 'absolute',
+          top: 60,
+          right: 24,
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          backgroundColor: theme.card,
+          borderWidth: 1,
+          borderColor: theme.border,
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 10,
+        }}
+      >
+        <Ionicons 
+          name={activeTheme === 'light' ? 'moon-outline' : 'sunny-outline'} 
+          size={22} 
+          color={theme.text} 
+        />
+      </TouchableOpacity>
+
       {/* Glowing orbs */}
-      <View style={[styles.orb, styles.orbTop]} />
-      <View style={[styles.orb, styles.orbBottom]} />
+      <View style={[styles.orb, styles.orbTop, { backgroundColor: theme.primary }]} />
+      <View style={[styles.orb, styles.orbBottom, { backgroundColor: theme.accent }]} />
 
       <SafeAreaView style={styles.safe}>
         {/* Logo area */}
         <View style={styles.hero}>
-          <View style={styles.logoRing}>
+          <View style={[styles.logoRing, { shadowColor: theme.primary }]}>
             <LinearGradient
               colors={COLORS.gradients.warm}
               style={styles.logoGradient}
@@ -52,32 +84,35 @@ export default function WelcomeScreen() {
             </LinearGradient>
           </View>
 
-          <Text style={styles.appName}>Chana</Text>
-          <Text style={styles.tagline}>Every connection starts with one.</Text>
+          <Text style={[styles.appName, { color: theme.text }]}>Chana</Text>
+          <Text style={[styles.tagline, { color: theme.textMuted }]}>Every connection starts with one.</Text>
         </View>
 
         {/* Action area */}
         <View style={styles.footer}>
-          <View style={[styles.card, { backgroundColor: 'rgba(26,26,36,0.9)' }]}>
+          <View style={[styles.card, { 
+            backgroundColor: activeTheme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(26,26,36,0.9)',
+            borderColor: theme.border
+          }]}>
             <Button
               title="Continue with Google"
               variant="outline"
               style={styles.socialBtn}
-              icon={<Ionicons name="logo-google" size={20} color="#FFFFFF" />}
+              icon={<Ionicons name="logo-google" size={20} color={theme.text} />}
               onPress={signInWithGoogle}
             />
             <Button
               title="Continue with Apple"
               variant="outline"
               style={styles.socialBtn}
-              icon={<Ionicons name="logo-apple" size={22} color="#FFFFFF" />}
+              icon={<Ionicons name="logo-apple" size={22} color={theme.text} />}
               onPress={signInWithApple}
             />
 
             <View style={styles.dividerRow}>
-              <View style={[styles.divider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={[styles.divider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
+              <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              <Text style={[styles.dividerText, { color: theme.textMuted }]}>or</Text>
+              <View style={[styles.divider, { backgroundColor: theme.border }]} />
             </View>
 
             <Button
@@ -89,9 +124,9 @@ export default function WelcomeScreen() {
             />
 
             <View style={styles.loginRow}>
-              <Text style={styles.loginText}>Already have an account? </Text>
+              <Text style={[styles.loginText, { color: theme.textMuted }]}>Already have an account? </Text>
               <Text
-                style={styles.loginLink}
+                style={[styles.loginLink, { color: theme.primary }]}
                 onPress={() => router.push('/(auth)/login')}
               >
                 Log in
@@ -99,7 +134,7 @@ export default function WelcomeScreen() {
             </View>
           </View>
 
-          <Text style={styles.terms}>
+          <Text style={[styles.terms, { color: theme.textMuted }]}>
             By continuing you agree to our Terms & Privacy Policy
           </Text>
         </View>
