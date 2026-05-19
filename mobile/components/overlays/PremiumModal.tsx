@@ -134,6 +134,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
   };
 
   const handleUpgrade = async () => {
+    Keyboard.dismiss(); // Dismiss keyboard immediately to release OS focus for system USSD dialogs
     if (paymentMethod === 'ecocash' && (!phone || phone.length < 10)) {
       Alert.alert('Invalid Phone', 'Please enter a valid EcoCash phone number.');
       return;
