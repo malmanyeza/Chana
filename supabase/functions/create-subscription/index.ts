@@ -32,7 +32,19 @@ Deno.serve(async (req: Request) => {
     if (authError || !user) throw new Error("Unauthorized");
 
     const { planId, phone, paymentMethod = 'ecocash' } = await req.json();
-    const amount = planId === 'weekly' ? 1.00 : 3.00;
+    
+    // Fetch the actual price of the plan dynamically from the database!
+    const { data: planData, error: planError } = await supabase
+      .from('subscription_plans')
+      .select('price')
+      .eq('id', planId)
+      .single();
+
+    if (planError || !planData) {
+      throw new Error(`Subscription plan not found: ${planId}`);
+    }
+
+    const amount = planData.price;
 
     // 1. Create subscription record
     const { data: subscription, error: subError } = await supabase
