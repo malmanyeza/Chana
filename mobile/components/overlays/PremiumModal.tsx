@@ -290,6 +290,29 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        
+        // 1. Fetch subscription details to get poll_url
+        const { data: subRecord } = await supabase
+          .from('subscriptions')
+          .select('poll_url')
+          .eq('id', subscriptionId)
+          .single();
+
+        let rawPaynowResponse = null;
+
+        // 2. Fetch the poll URL directly from the client (mobile device) which is immune to cloud IP blocks
+        if (subRecord && subRecord.poll_url) {
+          try {
+            const paynowResp = await fetch(subRecord.poll_url);
+            const paynowText = await paynowResp.text();
+            if (paynowText && paynowText.includes('status=')) {
+              rawPaynowResponse = paynowText;
+            }
+          } catch (clientFetchErr) {
+            console.warn('[PremiumModal] Client-side fetch of poll_url failed:', clientFetchErr);
+          }
+        }
+
         const response = await fetch(`${supabase.supabaseUrl}/functions/v1/check-subscription`, {
           method: 'POST',
           headers: {
@@ -297,7 +320,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
             'Authorization': `Bearer ${session?.access_token}`,
             'apikey': supabase.supabaseAnonKey,
           },
-          body: JSON.stringify({ subscriptionId })
+          body: JSON.stringify({ subscriptionId, rawPaynowResponse })
         });
 
         const resData = await response.json();
