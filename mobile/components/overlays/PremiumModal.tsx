@@ -408,6 +408,45 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                         />
                       </View>
                       <Text style={styles.inputHelp}>USSD push will be sent to this number</Text>
+                      
+                      {/* Sandbox Testing Guide with Tap-to-Autofill */}
+                      <View style={[styles.sandboxCard, { backgroundColor: 'rgba(255,193,7,0.06)', borderColor: 'rgba(255,193,7,0.2)' }]}>
+                        <View style={styles.sandboxHeader}>
+                          <Ionicons name="construct-outline" size={16} color="#FFC107" style={{ marginRight: 6 }} />
+                          <Text style={styles.sandboxTitle}>Sandbox Test Numbers (Tap to Auto-fill):</Text>
+                        </View>
+                        <View style={styles.sandboxGrid}>
+                          <TouchableOpacity 
+                            style={styles.sandboxBadge}
+                            onPress={() => setPhone('0771111111')}
+                          >
+                            <Text style={styles.sandboxBadgeText}>0771111111</Text>
+                            <Text style={styles.sandboxBadgeLabel}>Success</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            style={styles.sandboxBadge}
+                            onPress={() => setPhone('0772222222')}
+                          >
+                            <Text style={styles.sandboxBadgeText}>0772222222</Text>
+                            <Text style={styles.sandboxBadgeLabel}>Delayed</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            style={styles.sandboxBadge}
+                            onPress={() => setPhone('0773333333')}
+                          >
+                            <Text style={styles.sandboxBadgeText}>0773333333</Text>
+                            <Text style={styles.sandboxBadgeLabel}>Cancel</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            style={styles.sandboxBadge}
+                            onPress={() => setPhone('0774444444')}
+                          >
+                            <Text style={styles.sandboxBadgeText}>0774444444</Text>
+                            <Text style={styles.sandboxBadgeLabel}>No Funds</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <Text style={styles.sandboxNote}>* Note: In test mode, your Paynow authemail must match your merchant account email.</Text>
+                      </View>
                     </View>
                   )}
 
@@ -753,5 +792,56 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.body,
     fontSize: 11,
     color: '#8E8E93',
+  },
+  sandboxCard: {
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 8,
+  },
+  sandboxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  sandboxTitle: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 12,
+    color: '#FFC107',
+  },
+  sandboxGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sandboxBadge: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    gap: 2,
+  },
+  sandboxBadgeText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 12,
+    color: '#FFF',
+  },
+  sandboxBadgeLabel: {
+    fontFamily: FONTS.body,
+    fontSize: 10,
+    color: '#8E8E93',
+  },
+  sandboxNote: {
+    fontFamily: FONTS.body,
+    fontSize: 9,
+    color: '#8E8E93',
+    lineHeight: 12,
+    marginTop: 2,
   }
 });
