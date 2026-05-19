@@ -1,4 +1,4 @@
--- Create a function to get dashboard stats that bypasses RLS
+-- Update get_dashboard_stats to select is_premium and premium_until fields from profiles
 CREATE OR REPLACE FUNCTION get_dashboard_stats()
 RETURNS json
 LANGUAGE plpgsql
@@ -46,8 +46,5 @@ BEGIN
 END;
 $$;
 
--- Grant access to the anonymous user so the dashboard can call it
 GRANT EXECUTE ON FUNCTION get_dashboard_stats() TO anon;
-
--- Force Supabase PostgREST to reload the schema cache so the new function is immediately available
 NOTIFY pgrst, 'reload schema';

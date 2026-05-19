@@ -143,17 +143,21 @@ export default function Users() {
                           {user.fullName}
                           {user.isPremium && (
                             <span style={{
-                              backgroundColor: 'rgba(255, 215, 0, 0.15)',
-                              color: '#FFD700',
-                              border: '1px solid rgba(255, 215, 0, 0.4)',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              fontSize: '9px',
-                              fontWeight: 'bold',
+                              background: 'linear-gradient(135deg, #FFE066 0%, #F5C400 100%)',
+                              color: '#1A1A1A',
+                              boxShadow: '0 2px 8px rgba(245, 196, 0, 0.25)',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '8.5px',
+                              fontWeight: 800,
                               textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
+                              letterSpacing: '0.7px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              lineHeight: 1,
+                              border: '1px solid rgba(255, 255, 255, 0.3)'
                             }}>
-                              Gold
+                              ✨ Gold
                             </span>
                           )}
                         </div>
@@ -176,23 +180,50 @@ export default function Users() {
                   <td style={{ fontWeight: 600, color: 'var(--success)' }}>{user.matches}</td>
                   <td>
                     {user.isPremium ? (
-                      <div>
-                        <span className="badge" style={{ 
-                          backgroundColor: 'rgba(255, 215, 0, 0.15)', 
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ 
+                          background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(245, 196, 0, 0.25) 100%)', 
                           color: '#FFD700',
-                          border: '1px solid rgba(255, 215, 0, 0.3)',
-                          fontWeight: 'bold'
+                          border: '1px solid rgba(245, 196, 0, 0.45)',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          alignSelf: 'flex-start',
+                          boxShadow: '0 2px 10px rgba(245, 196, 0, 0.1)',
+                          textShadow: '0 0 10px rgba(255, 215, 0, 0.2)'
                         }}>
-                          Gold Premium
+                          <span style={{ color: '#FFD700', fontSize: '12px' }}>👑</span> Gold Premium
                         </span>
                         {user.premiumUntil && (
-                          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            Expires {new Date(user.premiumUntil).toLocaleDateString()}
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: 'var(--text-muted)', 
+                            marginTop: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <span>⏳</span> Expires {new Date(user.premiumUntil).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </div>
                         )}
                       </div>
                     ) : (
-                      <span className="badge" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                      <span className="badge" style={{ 
+                        backgroundColor: 'rgba(255,255,255,0.03)', 
+                        color: 'var(--text-muted)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '11px'
+                      }}>
                         Free Plan
                       </span>
                     )}
