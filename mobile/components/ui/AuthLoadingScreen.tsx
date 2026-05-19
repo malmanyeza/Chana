@@ -38,20 +38,14 @@ export function AuthLoadingScreen() {
       <View style={[styles.orb1, { backgroundColor: theme.primary }]} />
       <View style={[styles.orb2, { backgroundColor: theme.accent }]} />
 
-      <Animated.View style={[styles.logoWrap, { transform: [{ scale: pulse }], shadowColor: theme.primary }]}>
-        <LinearGradient
-          colors={COLORS.gradients.warm as [string, string]}
-          style={styles.logoGradient}
-        >
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </LinearGradient>
+      <Animated.View style={{ transform: [{ scale: pulse }] }}>
+        <Image
+          source={require('../../assets/images/splash-icon.png')}
+          style={styles.splashIcon}
+          resizeMode="contain"
+        />
       </Animated.View>
 
-      <Text style={[styles.appName, { color: theme.text }]}>Chana</Text>
       <Text style={[styles.tagline, { color: theme.textMuted }]}>Every connection starts with one.</Text>
 
       {/* Animated dots */}
@@ -114,32 +108,10 @@ const styles = StyleSheet.create({
     bottom: 100,
     left: -80,
   },
-  logoWrap: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    overflow: 'hidden',
+  splashIcon: {
+    width: 240,
+    height: 240,
     marginBottom: 20,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  logoGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 58,
-    height: 58,
-  },
-  appName: {
-    fontFamily: FONTS.display,
-    fontSize: 52,
-    color: '#FFFFFF',
-    marginBottom: 8,
   },
   tagline: {
     fontFamily: FONTS.body,

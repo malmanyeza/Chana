@@ -19,10 +19,47 @@ interface SwipeLimitModalProps {
   visible: boolean;
   onClose: () => void;
   onUnlockPremium: () => void;
+  resetAt?: Date | string;
 }
 
-export const SwipeLimitModal = ({ visible, onClose, onUnlockPremium }: SwipeLimitModalProps) => {
+export const SwipeLimitModal = ({ visible, onClose, onUnlockPremium, resetAt }: SwipeLimitModalProps) => {
   const theme = useAppTheme();
+  const [timeLeft, setTimeLeft] = React.useState('24:00:00');
+
+  React.useEffect(() => {
+    if (!visible) return;
+
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      let target: Date;
+
+      if (resetAt) {
+        target = new Date(resetAt);
+      } else {
+        // Default to midnight tonight
+        target = new Date();
+        target.setHours(24, 0, 0, 0);
+      }
+
+      const diff = target.getTime() - now.getTime();
+      if (diff <= 0) {
+        setTimeLeft('00:00:00');
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      const pad = (num: number) => String(num).padStart(2, '0');
+      setTimeLeft(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(interval);
+  }, [visible, resetAt]);
 
   return (
     <Modal
@@ -56,6 +93,13 @@ export const SwipeLimitModal = ({ visible, onClose, onUnlockPremium }: SwipeLimi
           {/* Title & Subtitle */}
           <Text style={[styles.title, { color: theme.text }]}>Unlock Unlimited Swipes</Text>
           
+          {/* Countdown Clock Display */}
+          <View style={[styles.timerContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+            <Ionicons name="time-outline" size={16} color="#FF9A3C" style={{ marginRight: 6 }} />
+            <Text style={[styles.timerLabel, { color: theme.textMuted }]}>Free swipes refill in: </Text>
+            <Text style={styles.timerText}>{timeLeft}</Text>
+          </View>
+
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>
             You've hit your daily free swiping limit. Upgrade to Chana Gold to get unlimited connections and start matching!
           </Text>
@@ -187,6 +231,27 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: SPACING.lg,
     paddingHorizontal: 6,
+  },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 154, 60, 0.15)',
+    marginBottom: SPACING.md,
+  },
+  timerLabel: {
+    fontFamily: FONTS.body,
+    fontSize: 12.5,
+  },
+  timerText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 13.5,
+    color: '#FF9A3C',
+    letterSpacing: 0.5,
   },
   perksContainer: {
     width: '100%',

@@ -464,6 +464,7 @@ const DiscoverScreen = () => {
           setShowSwipeLimitModal(false);
           setShowPremiumModal(true);
         }}
+        resetAt={profile?.last_swipe_reset ? new Date(new Date(profile.last_swipe_reset).getTime() + 24 * 60 * 60 * 1000) : undefined}
       />
     </SafeAreaView>
   );
