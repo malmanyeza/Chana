@@ -421,24 +421,32 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                     <TouchableOpacity 
                       style={[
                         styles.methodBtn, 
-                        paymentMethod === 'ecocash' && { borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.1)' }
+                        { 
+                          borderColor: paymentMethod === 'ecocash' ? '#FFD700' : theme.border,
+                          backgroundColor: paymentMethod === 'ecocash' ? 'rgba(255,215,0,0.08)' : theme.surface 
+                        }
                       ]}
                       onPress={() => setPaymentMethod('ecocash')}
                       disabled={loading}
+                      activeOpacity={0.8}
                     >
                       <Ionicons name="cash-outline" size={18} color={paymentMethod === 'ecocash' ? '#FFD700' : theme.textMuted} />
-                      <Text style={[styles.methodText, { color: paymentMethod === 'ecocash' ? '#FFD700' : theme.textMuted }]}>EcoCash</Text>
+                      <Text style={[styles.methodText, { color: paymentMethod === 'ecocash' ? '#FFD700' : theme.text }]}>EcoCash</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                       style={[
                         styles.methodBtn, 
-                        paymentMethod === 'card' && { borderColor: '#FFD700', backgroundColor: 'rgba(255,215,0,0.1)' }
+                        { 
+                          borderColor: paymentMethod === 'card' ? '#FFD700' : theme.border,
+                          backgroundColor: paymentMethod === 'card' ? 'rgba(255,215,0,0.08)' : theme.surface 
+                        }
                       ]}
                       onPress={() => setPaymentMethod('card')}
                       disabled={loading}
+                      activeOpacity={0.8}
                     >
                       <Ionicons name="card-outline" size={18} color={paymentMethod === 'card' ? '#FFD700' : theme.textMuted} />
-                      <Text style={[styles.methodText, { color: paymentMethod === 'card' ? '#FFD700' : theme.textMuted }]}>Visa/Card</Text>
+                      <Text style={[styles.methodText, { color: paymentMethod === 'card' ? '#FFD700' : theme.text }]}>Visa/Card</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -458,6 +466,17 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                         />
                       </View>
                       <Text style={styles.inputHelp}>USSD push will be sent to this number</Text>
+                    </View>
+                  )}
+
+                  {paymentMethod === 'card' && (
+                    <View style={styles.inputContainer}>
+                      <View style={[styles.cardInstructionBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                        <Ionicons name="information-circle-outline" size={20} color="#FFD700" style={{ marginRight: 8 }} />
+                        <Text style={[styles.cardInstructionText, { color: theme.textMuted }]}>
+                          You will be redirected to Paynow's secure page to complete your payment using Visa, Mastercard, or OneMoney.
+                        </Text>
+                      </View>
                     </View>
                   )}
 
@@ -701,10 +720,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
     gap: 8,
   },
   methodText: {
@@ -714,6 +732,20 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     marginBottom: 20,
+  },
+  cardInstructionBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  cardInstructionText: {
+    flex: 1,
+    fontFamily: FONTS.body,
+    fontSize: 12,
+    lineHeight: 18,
   },
   inputWrapper: {
     flexDirection: 'row',
