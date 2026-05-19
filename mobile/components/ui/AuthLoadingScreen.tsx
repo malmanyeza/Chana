@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, Animated, Image, useColorScheme } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS } from '../../constants/theme';
+import { useAppTheme } from '../../hooks/use-theme-color';
 
 export function AuthLoadingScreen() {
   const pulse = useRef(new Animated.Value(1)).current;
   const fade = useRef(new Animated.Value(0)).current;
+  const theme = useAppTheme();
+  const activeTheme = useColorScheme() ?? 'dark';
 
   useEffect(() => {
     // Fade in
@@ -25,15 +28,17 @@ export function AuthLoadingScreen() {
   }, []);
 
   return (
-    <Animated.View style={[styles.container, { opacity: fade }]}>
+    <Animated.View style={[styles.container, { opacity: fade, backgroundColor: theme.background }]}>
       <LinearGradient
-        colors={['#0F0F14', '#1A0A10', '#0F0F14']}
+        colors={activeTheme === 'light' 
+          ? ['#FAFAFA', '#FFEBF0', '#FAFAFA'] 
+          : ['#0F0F14', '#1A0A10', '#0F0F14']}
         style={StyleSheet.absoluteFillObject}
       />
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
+      <View style={[styles.orb1, { backgroundColor: theme.primary }]} />
+      <View style={[styles.orb2, { backgroundColor: theme.accent }]} />
 
-      <Animated.View style={[styles.logoWrap, { transform: [{ scale: pulse }] }]}>
+      <Animated.View style={[styles.logoWrap, { transform: [{ scale: pulse }], shadowColor: theme.primary }]}>
         <LinearGradient
           colors={COLORS.gradients.warm as [string, string]}
           style={styles.logoGradient}
@@ -46,16 +51,16 @@ export function AuthLoadingScreen() {
         </LinearGradient>
       </Animated.View>
 
-      <Text style={styles.appName}>Chana</Text>
-      <Text style={styles.tagline}>Every connection starts with one.</Text>
+      <Text style={[styles.appName, { color: theme.text }]}>Chana</Text>
+      <Text style={[styles.tagline, { color: theme.textMuted }]}>Every connection starts with one.</Text>
 
       {/* Animated dots */}
-      <DotsIndicator />
+      <DotsIndicator theme={theme} />
     </Animated.View>
   );
 }
 
-function DotsIndicator() {
+function DotsIndicator({ theme }: { theme: any }) {
   const dot1 = useRef(new Animated.Value(0.3)).current;
   const dot2 = useRef(new Animated.Value(0.3)).current;
   const dot3 = useRef(new Animated.Value(0.3)).current;
@@ -77,7 +82,7 @@ function DotsIndicator() {
   return (
     <View style={styles.dotsRow}>
       {[dot1, dot2, dot3].map((dot, i) => (
-        <Animated.View key={i} style={[styles.dot, { opacity: dot }]} />
+        <Animated.View key={i} style={[styles.dot, { opacity: dot, backgroundColor: theme.primary }]} />
       ))}
     </View>
   );
