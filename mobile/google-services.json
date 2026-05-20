@@ -12,7 +12,19 @@
           "package_name": "com.chana.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "15796302531-co3v6me6s4451qqub6doa7u6bpfjvrsj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chana.app"
+          }
+        },
+        {
+          "client_id": "15796302531-aljlkh6bdo4div6mg2gq61nd4o85j83f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD0-Jh2tUYO0qSgoARjan_CYcjTBXfQvks"
