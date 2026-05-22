@@ -65,15 +65,21 @@ export default function LoginScreen() {
         password,
       });
 
-      // Special fail-safe for admin account creation
-      if (result.error && normalizedEmail === 'admin@chana.com' && password === 'admin123!') {
-        console.log('Admin user does not exist. Creating account...');
+      // Special fail-safe for admin and reviewer account creation
+      const isReviewerAccount = 
+        (normalizedEmail === 'admin@chana.com' && password === 'admin123!') ||
+        (normalizedEmail === 'appreview@chana.com' && password === 'AppReview123!') ||
+        (normalizedEmail === 'apple@chana.com' && password === 'AppReview123!');
+
+      if (result.error && isReviewerAccount) {
+        console.log('Reviewer/Admin user does not exist. Creating account...');
+        const fullName = normalizedEmail.includes('admin') ? 'System Admin' : 'App Reviewer';
         const signUpResult = await supabase.auth.signUp({
           email: normalizedEmail,
           password: password,
           options: {
             data: {
-              full_name: 'System Admin',
+              full_name: fullName,
               is_onboarded: true
             }
           }
@@ -86,7 +92,7 @@ export default function LoginScreen() {
             password,
           });
         } else {
-          console.error('Failed to auto-create admin:', signUpResult.error);
+          console.error('Failed to auto-create reviewer/admin:', signUpResult.error);
         }
       }
 

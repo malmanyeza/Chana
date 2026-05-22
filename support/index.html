@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chana — Help & Support Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF5A5F;
+            --primary-grad: linear-gradient(135deg, #FF5A5F 0%, #FF8A00 100%);
+            --bg: #0B0B0F;
+            --card: #14141C;
+            --border: #22222E;
+            --text: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --success: #00C9A7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            text-decoration: none;
+        }
+
+        .logo-heart {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-grad);
+            clip-path: path('M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z');
+            transform: scale(1.2) translate(3px, 3px);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: var(--primary-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            color: var(--text);
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(255, 90, 95, 0.3);
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        .faq-question {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .faq-answer {
+            padding: 0 20px 18px 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: none;
+            border-top: 1px solid transparent;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            border-top-color: var(--border);
+        }
+
+        .faq-toggle {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .contact-card {
+            background: linear-gradient(135deg, rgba(255, 90, 95, 0.05) 0%, rgba(255, 138, 0, 0.05) 100%);
+            border: 1px dashed rgba(255, 90, 95, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .contact-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .contact-email {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .contact-email:hover {
+            color: #FF8A00;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 30px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+            .container {
+                padding: 20px;
+                border-radius: 12px;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .contact-email {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="../" class="logo-container">
+            <div class="logo-heart"></div>
+            <h1>Chana</h1>
+        </a>
+        <p class="subtitle">Help & Support Center</p>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+
+        <!-- FAQ 1 -->
+        <div class="faq-item" id="faq-matching">
+            <div class="faq-question" onclick="toggleFaq('faq-matching')">
+                <span>How does matching work on Chana?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                Chana is built on a mutual-opt-in matching engine. You can browse through profile cards in your local area. If you are interested in connecting with a profile, swipe right. If not, swipe left. A match is successfully established only when both users have swiped right on each other, after which an instant real-time chat interface will become available.
+            </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item" id="faq-deletion">
+            <div class="faq-question" onclick="toggleFaq('faq-deletion')">
+                <span>How do I delete my Chana account and personal data?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                Your data privacy is fully respected. To permanently delete your profile, swipe history, chats, and personal details: Open the Chana app, navigate to the Settings tab, tap on Profile Settings, and select the Delete Account option. This action is permanent and instantly wipes your data from our active matching server.
+            </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item" id="faq-premium">
+            <div class="faq-question" onclick="toggleFaq('faq-premium')">
+                <span>What is the Likes tab?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                The Likes tab is a premium feature that shows you a list of active users who have already swiped right on your profile. This allows you to review interested profiles and immediately create matches without having to search for them in the general discovery pool.
+            </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item" id="faq-safety">
+            <div class="faq-question" onclick="toggleFaq('faq-safety')">
+                <span>How do I report safety concerns or abusive behavior?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                We maintain a zero-tolerance policy for harassment or safety violations. You can review safety rules inside the in-app Safety Guidelines screen under your settings. To report or block a user, open the chat screen with the user, tap on the menu icon in the top right, and select Block and Report. Our administration team reviews all safety reports within 24 hours.
+            </div>
+        </div>
+
+        <!-- Contact support card -->
+        <div class="contact-card">
+            <h3>Still need assistance?</h3>
+            <p>Our dedicated support team is ready to help you with any technical issues, feedback, or general questions.</p>
+            <a href="mailto:support@chana.app" class="contact-email">support@chana.app</a>
+        </div>
+
+        <!-- Legal footer links -->
+        <div class="footer-links">
+            <a href="../">Home Portal</a>
+            <a href="../privacy-policy/">Privacy Policy</a>
+            <a href="../terms-of-use/">Terms of Use</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Chana. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleFaq(id) {
+            const item = document.getElementById(id);
+            const isActive = item.classList.contains('active');
+            
+            // Close all open FAQs first
+            const allItems = document.querySelectorAll('.faq-item');
+            allItems.forEach(i => i.classList.remove('active'));
+            
+            // Toggle current FAQ
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
