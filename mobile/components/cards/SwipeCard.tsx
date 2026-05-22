@@ -147,7 +147,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           key={`${profile.id}-${photoIndex}`}
           source={{ uri: profile.photos[photoIndex] || profile.photos[0] }} 
           style={styles.image} 
-          contentFit="contain"
+          contentFit="cover"
           placeholder="https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400&q=40" // Generic profile placeholder
         />
         
@@ -210,7 +210,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
             </View>
             
             <View style={styles.locationPill}>
-              <Ionicons name="location" size={12} color={theme.primary} />
+              <Ionicons name="location" size={14} color={theme.primary} />
               <Text style={styles.locationText}>
                 {profile.city}{profile.distance ? ` • ${profile.distance}` : ''}
               </Text>
@@ -218,7 +218,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           </View>
 
           {profile.bio && (
-            <Text style={styles.bio} numberOfLines={2}>
+            <Text style={styles.bio} numberOfLines={3}>
               {profile.bio}
             </Text>
           )}
@@ -317,17 +317,14 @@ const styles = StyleSheet.create({
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
     alignSelf: 'flex-start',
     gap: 4,
+    marginTop: 4,
   },
   locationText: {
-    fontFamily: FONTS.bodyBold,
-    fontSize: 12,
-    color: '#FFFFFF',
+    fontFamily: FONTS.body,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   bio: {
     fontFamily: FONTS.body,
@@ -342,15 +339,16 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   interestTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   interestText: {
     fontFamily: FONTS.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     color: '#FFFFFF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
