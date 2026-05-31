@@ -636,14 +636,24 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                       {loading ? (
                         <View style={styles.loadingRow}>
                           <ActivityIndicator color="#000" size="small" style={{ marginRight: 6 }} />
-                          <Text style={styles.upgradeText}>
+                          <Text 
+                            style={styles.upgradeText}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumScaleFactor={0.6}
+                          >
                             {isPolling 
                               ? (paymentMethod === 'ecocash' ? 'Awaiting USSD... (Tap to Cancel)' : 'Awaiting Card... (Tap to Cancel)') 
                               : 'Processing...'}
                           </Text>
                         </View>
                       ) : (
-                        <Text style={styles.upgradeText}>
+                        <Text 
+                          style={styles.upgradeText}
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumScaleFactor={0.7}
+                        >
                           {paymentMethod === 'ecocash' ? 'Subscribe with EcoCash' : 'Subscribe with Card'}
                         </Text>
                       )}
@@ -942,6 +952,9 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: FONTS.bodyBold,
     fontSize: 16,
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   footerNote: {
     marginTop: 16,

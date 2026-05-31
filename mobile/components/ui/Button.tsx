@@ -49,6 +49,9 @@ export const Button: React.FC<ButtonProps> = ({
             variant === 'ghost' ? { color: theme.primary } : {},
             textStyle,
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumScaleFactor={0.7}
         >
           {title}
         </Text>
@@ -144,6 +147,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bodyBold,
     fontSize: 16,
     letterSpacing: 0.5,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   textPrimary: {
     color: '#FFFFFF',
