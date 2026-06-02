@@ -42,6 +42,9 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    let sessionTimeoutId: NodeJS.Timeout;
+    let authTimeoutId: NodeJS.Timeout;
+
     // Initialize session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error || !session) {
@@ -54,7 +57,17 @@ export default function RootLayout() {
       
       setSession(session);
       setUser(session.user);
-      fetchProfile(session.user.id).finally(() => setLoading(false));
+      
+      // Set a fallback safety timeout of 3.5s to prevent infinite loading spinners on cold-starts/offline
+      sessionTimeoutId = setTimeout(() => {
+        console.log('⏳ Session profile fetch timed out. Settle gracefully.');
+        setLoading(false);
+      }, 3500);
+
+      fetchProfile(session.user.id).finally(() => {
+        clearTimeout(sessionTimeoutId);
+        setLoading(false);
+      });
     });
 
     // Listen for auth changes
@@ -63,7 +76,17 @@ export default function RootLayout() {
       setUser(session?.user ?? null);
       if (session?.user) {
         setLoading(true); // Ensure we show loading while fetching new profile
-        fetchProfile(session.user.id).finally(() => setLoading(false));
+        
+        // Safety timeout for auth changes
+        authTimeoutId = setTimeout(() => {
+          console.log('⏳ Auth change profile fetch timed out. Settle gracefully.');
+          setLoading(false);
+        }, 3500);
+
+        fetchProfile(session.user.id).finally(() => {
+          clearTimeout(authTimeoutId);
+          setLoading(false);
+        });
       } else {
         useAuthStore.getState().setProfile(null);
         setLoading(false);
@@ -91,6 +114,8 @@ export default function RootLayout() {
     return () => {
       subscription.unsubscribe();
       cleanupNotifications();
+      if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+      if (authTimeoutId) clearTimeout(authTimeoutId);
     };
   }, []);
 
@@ -148,11 +173,12 @@ export default function RootLayout() {
   }, [session?.user?.id, profile?.id]);
 
   useEffect(() => {
-    // Hide splash screen ONLY when fonts are loaded AND auth state is settled
-    if ((loaded || error) && !isLoading) {
+    // Hide splash screen as soon as fonts are loaded so the user transitions
+    // immediately to our interactive loading screen instead of a frozen splash.
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error, isLoading]);
+  }, [loaded, error]);
 
   useEffect(() => {
     // Wait for fonts AND auth/profile loading to finish before redirecting
