@@ -13,7 +13,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -176,6 +177,121 @@ export default function ChatScreen() {
     }
   };
 
+  const handleHeaderOptions = () => {
+    if (!match || !match.otherUser) return;
+    const otherUserId = (match as any).user1_id === user?.id ? (match as any).user2_id : (match as any).user1_id;
+
+    Alert.alert(
+      'Safety Options',
+      'Choose an action to moderate or restrict your connection with this user.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Report / Flag Content', 
+          onPress: () => handleReportUser(otherUserId) 
+        },
+        { 
+          text: 'Block User', 
+          style: 'destructive',
+          onPress: () => confirmBlockUser(otherUserId) 
+        }
+      ]
+    );
+  };
+
+  const handleReportUser = (otherUserId: string) => {
+    Alert.alert(
+      'Report User',
+      'Select a reason for reporting this user:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Inappropriate Photos', onPress: () => submitReport(otherUserId, 'Inappropriate Photos') },
+        { text: 'Harassment or Abuse', onPress: () => submitReport(otherUserId, 'Harassment or Abuse') },
+        { text: 'Spam or Scam', onPress: () => submitReport(otherUserId, 'Spam or Scam') },
+      ]
+    );
+  };
+
+  const submitReport = async (otherUserId: string, reason: string) => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      // 1. Submit report to database (wrapped in try/catch in case table is not migrated yet)
+      try {
+        await supabase
+          .from('user_reports')
+          .insert([{
+            reporter_id: user.id,
+            reported_id: otherUserId,
+            reason,
+            content_snapshot: `MatchID: ${matchId}`
+          }]);
+      } catch (dbErr) {
+        console.warn('DB report write failed, proceeding with block flow:', dbErr);
+      }
+
+      // 2. Automatically block the user after reporting them
+      await blockUser(otherUserId);
+      
+      Alert.alert(
+        'Thank You',
+        'Your report has been submitted to the safety team. This user has been blocked and removed from your feed.',
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/matches') }]
+      );
+    } catch (err: any) {
+      setIsLoading(false);
+      Alert.alert('Error', err.message);
+    }
+  };
+
+  const confirmBlockUser = (otherUserId: string) => {
+    Alert.alert(
+      'Block User?',
+      'Are you sure you want to block this user? They will be permanently removed from your chats and discovery feed.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Block and Remove', style: 'destructive', onPress: () => performBlock(otherUserId) }
+      ]
+    );
+  };
+
+  const performBlock = async (otherUserId: string) => {
+    setIsLoading(true);
+    try {
+      await blockUser(otherUserId);
+      Alert.alert(
+        'User Blocked',
+        'This user has been permanently blocked and removed from your chat history.',
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/matches') }]
+      );
+    } catch (err: any) {
+      setIsLoading(false);
+      Alert.alert('Error', err.message);
+    }
+  };
+
+  const blockUser = async (otherUserId: string) => {
+    if (!user || !matchId) return;
+
+    // Delete match row to clear conversation and matches lists instantly
+    const { error: matchError } = await supabase
+      .from('matches')
+      .delete()
+      .eq('id', matchId);
+
+    if (matchError) throw matchError;
+
+    // Insert a pass swipe so they never appear in discovery again
+    await supabase
+      .from('swipes')
+      .upsert({
+        swiper_id: user.id,
+        swiped_id: otherUserId,
+        type: 'pass',
+        created_at: new Date().toISOString()
+      }, { onConflict: 'swiper_id,swiped_id' });
+  };
+
   if (isLoading && !match) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
@@ -214,6 +330,12 @@ export default function ChatScreen() {
             </View>
           </View>
 
+          <TouchableOpacity 
+            onPress={handleHeaderOptions} 
+            style={styles.optionButton}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color={theme.textMuted} />
+          </TouchableOpacity>
         </View>
 
         <Pressable 

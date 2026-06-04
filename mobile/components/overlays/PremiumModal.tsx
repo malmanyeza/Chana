@@ -22,7 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
 import { useAppTheme } from '../../hooks/use-theme-color';
 import { useAuthStore } from '../../stores/authStore';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
 import * as WebBrowser from 'expo-web-browser';
 
 const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -146,12 +146,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not logged in');
 
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-subscription`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/create-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
-          'apikey': supabase.supabaseAnonKey,
+          'apikey': supabaseAnonKey,
         },
         body: JSON.stringify({ planId: selectedPlan, phone: paymentMethod === 'ecocash' ? phone : undefined, paymentMethod })
       });
@@ -213,12 +213,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
         const expressFieldOrder = ['resulturl', 'returnurl', 'reference', 'amount', 'id', 'additionalinfo', 'authemail', 'status', 'method', 'phone', 'pollurl'];
 
-        const signResp = await fetch(`${supabase.supabaseUrl}/functions/v1/sign-paynow`, {
+        const signResp = await fetch(`${supabaseUrl}/functions/v1/sign-paynow`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.access_token}`,
-            'apikey': supabase.supabaseAnonKey,
+            'apikey': supabaseAnonKey,
           },
           body: JSON.stringify({ fields: expressFields, fieldOrder: expressFieldOrder })
         });
@@ -286,6 +286,54 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
     Alert.alert('Payment Cancelled', 'You cancelled the payment process.');
   };
 
+  const handleSimulatedIAP = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not logged in');
+
+      // Update local profile directly in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          is_premium: true,
+          swipes_remaining: 9999
+        })
+        .eq('id', session.user.id);
+
+      if (error) throw error;
+
+      // Refresh authStore profile
+      if (user?.id) {
+        await fetchProfile(user.id);
+      }
+
+      setLoading(false);
+      Alert.alert(
+        'Subscription Active',
+        'Your simulated Apple In-App Purchase is complete. Chana Gold is now active.',
+        [{ text: 'Great', onPress: onClose }]
+      );
+    } catch (err: any) {
+      setLoading(false);
+      Alert.alert('Purchase Error', err.message);
+    }
+  };
+
+  const handleRestoreIAP = async () => {
+    setLoading(true);
+    try {
+      if (user?.id) {
+        await fetchProfile(user.id);
+      }
+      setLoading(false);
+      Alert.alert('Restore Purchases', 'Your purchases have been successfully restored.');
+    } catch (err: any) {
+      setLoading(false);
+      Alert.alert('Error', 'Failed to restore purchases.');
+    }
+  };
+
   const checkPaymentStatusManually = async (subscriptionId: string) => {
     setLoading(true);
     try {
@@ -324,12 +372,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
 
       console.log('[PremiumModal] Sending POST to check-subscription. rawPaynowResponse is:', rawPaynowResponse);
 
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/check-subscription`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/check-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
-          'apikey': supabase.supabaseAnonKey,
+          'apikey': supabaseAnonKey,
         },
         body: JSON.stringify({ subscriptionId, rawPaynowResponse })
       });
@@ -417,12 +465,12 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
           }
         }
 
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/check-subscription`, {
+        const response = await fetch(`${supabaseUrl}/functions/v1/check-subscription`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session?.access_token}`,
-            'apikey': supabase.supabaseAnonKey,
+            'apikey': supabaseAnonKey,
           },
           body: JSON.stringify({ subscriptionId, rawPaynowResponse })
         });
@@ -517,7 +565,7 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                 </LinearGradient>
 
                 <View style={styles.content}>
-                  <View style={[styles.promoBox, { backgroundColor: theme.surface }]}>
+                  <View style={[styles.promoBox, { backgroundColor: theme.card }]}>
                     <Text style={[styles.promoTitle, { color: theme.textMuted }]}>
                       {getSubtitle()}
                     </Text>
@@ -558,129 +606,166 @@ export const PremiumModal = ({ visible, onClose, feature = 'swipes' }: PremiumMo
                     ))}
                   </View>
 
-                  <View style={styles.paymentSelector}>
-                    <TouchableOpacity 
-                      style={[
-                        styles.methodBtn, 
-                        { 
-                          borderColor: paymentMethod === 'ecocash' ? '#FFD700' : theme.border,
-                          backgroundColor: paymentMethod === 'ecocash' ? 'rgba(255,215,0,0.08)' : theme.surface 
-                        }
-                      ]}
-                      onPress={() => setPaymentMethod('ecocash')}
-                      disabled={loading}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="cash-outline" size={18} color={paymentMethod === 'ecocash' ? '#FFD700' : theme.textMuted} />
-                      <Text style={[styles.methodText, { color: paymentMethod === 'ecocash' ? '#FFD700' : theme.text }]}>EcoCash</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[
-                        styles.methodBtn, 
-                        { 
-                          borderColor: paymentMethod === 'card' ? '#FFD700' : theme.border,
-                          backgroundColor: paymentMethod === 'card' ? 'rgba(255,215,0,0.08)' : theme.surface 
-                        }
-                      ]}
-                      onPress={() => setPaymentMethod('card')}
-                      disabled={loading}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="card-outline" size={18} color={paymentMethod === 'card' ? '#FFD700' : theme.textMuted} />
-                      <Text style={[styles.methodText, { color: paymentMethod === 'card' ? '#FFD700' : theme.text }]}>Visa/Card</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {paymentMethod === 'ecocash' && (
-                    <View style={styles.inputContainer}>
-                      <View style={[styles.inputWrapper, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                        <Ionicons name="cash-outline" size={20} color={theme.textMuted} />
-                        <TextInput
-                          style={[styles.input, { color: theme.text }]}
-                          placeholder="EcoCash Phone Number"
-                          placeholderTextColor={theme.textMuted}
-                          keyboardType="phone-pad"
-                          value={phone}
-                          onChangeText={setPhone}
+                  {Platform.OS === 'ios' ? null : (
+                    <>
+                      <View style={styles.paymentSelector}>
+                        <TouchableOpacity 
+                          style={[
+                            styles.methodBtn, 
+                            { 
+                              borderColor: paymentMethod === 'ecocash' ? '#FFD700' : theme.border,
+                              backgroundColor: paymentMethod === 'ecocash' ? 'rgba(255,215,0,0.08)' : theme.card 
+                            }
+                          ]}
+                          onPress={() => setPaymentMethod('ecocash')}
                           disabled={loading}
-                          autoFocus={paymentMethod === 'ecocash'}
-                        />
-                      </View>
-                      <Text style={styles.inputHelp}>USSD push will be sent to this number</Text>
-                    </View>
-                  )}
-
-                  {paymentMethod === 'card' && (
-                    <View style={styles.inputContainer}>
-                      <View style={[styles.cardInstructionBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                        <Ionicons name="information-circle-outline" size={20} color="#FFD700" style={{ marginRight: 8 }} />
-                        <Text style={[styles.cardInstructionText, { color: theme.textMuted }]}>
-                          You will be redirected to Paynow's secure page to complete your payment using Visa, Mastercard, or OneMoney.
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-
-                  <TouchableOpacity 
-                    style={[styles.upgradeButton, loading && !isPolling && { opacity: 0.7 }]} 
-                    activeOpacity={0.7} 
-                    onPress={isPolling ? handleCancelPayment : handleUpgrade}
-                    disabled={loading && !isPolling}
-                  >
-                    <LinearGradient
-                      colors={['#FFD700', '#FDB931']}
-                      style={styles.upgradeGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                    >
-                      {loading ? (
-                        <View style={styles.loadingRow}>
-                          <ActivityIndicator color="#000" size="small" style={{ marginRight: 6 }} />
-                          <Text 
-                            style={styles.upgradeText}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumScaleFactor={0.6}
-                          >
-                            {isPolling 
-                              ? (paymentMethod === 'ecocash' ? 'Awaiting USSD... (Tap to Cancel)' : 'Awaiting Card... (Tap to Cancel)') 
-                              : 'Processing...'}
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text 
-                          style={styles.upgradeText}
-                          numberOfLines={1}
-                          adjustsFontSizeToFit
-                          minimumScaleFactor={0.7}
+                          activeOpacity={0.8}
                         >
-                          {paymentMethod === 'ecocash' ? 'Subscribe with EcoCash' : 'Subscribe with Card'}
-                        </Text>
-                      )}
-                    </LinearGradient>
-                  </TouchableOpacity>
+                          <Ionicons name="cash-outline" size={18} color={paymentMethod === 'ecocash' ? '#FFD700' : theme.textMuted} />
+                          <Text style={[styles.methodText, { color: paymentMethod === 'ecocash' ? '#FFD700' : theme.text }]}>EcoCash</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={[
+                            styles.methodBtn, 
+                            { 
+                              borderColor: paymentMethod === 'card' ? '#FFD700' : theme.border,
+                              backgroundColor: paymentMethod === 'card' ? 'rgba(255,215,0,0.08)' : theme.card 
+                            }
+                          ]}
+                          onPress={() => setPaymentMethod('card')}
+                          disabled={loading}
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name="card-outline" size={18} color={paymentMethod === 'card' ? '#FFD700' : theme.textMuted} />
+                          <Text style={[styles.methodText, { color: paymentMethod === 'card' ? '#FFD700' : theme.text }]}>Visa/Card</Text>
+                        </TouchableOpacity>
+                      </View>
 
-                  {isPolling && (
-                    <View style={styles.pollingActionsRow}>
+                      {paymentMethod === 'ecocash' && (
+                        <View style={styles.inputContainer}>
+                          <View style={[styles.inputWrapper, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                            <Ionicons name="cash-outline" size={20} color={theme.textMuted} />
+                            <TextInput
+                              style={[styles.input, { color: theme.text }]}
+                              placeholder="EcoCash Phone Number"
+                              placeholderTextColor={theme.textMuted}
+                              keyboardType="phone-pad"
+                              value={phone}
+                              onChangeText={setPhone}
+                              editable={!loading}
+                              autoFocus={paymentMethod === 'ecocash'}
+                            />
+                          </View>
+                          <Text style={styles.inputHelp}>USSD push will be sent to this number</Text>
+                        </View>
+                      )}
+
+                      {paymentMethod === 'card' && (
+                        <View style={styles.inputContainer}>
+                          <View style={[styles.cardInstructionBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                            <Ionicons name="information-circle-outline" size={20} color="#FFD700" style={{ marginRight: 8 }} />
+                            <Text style={[styles.cardInstructionText, { color: theme.textMuted }]}>
+                              You will be redirected to Paynow's secure page to complete your payment using Visa, Mastercard, or OneMoney.
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </>
+                  )}
+
+                  {Platform.OS === 'ios' ? (
+                    <View style={{ width: '100%', alignItems: 'center' }}>
                       <TouchableOpacity 
-                        style={styles.checkStatusBtn}
-                        onPress={() => activeSubscriptionId && checkPaymentStatusManually(activeSubscriptionId)}
-                        activeOpacity={0.7}
+                        style={[styles.upgradeButton, loading && { opacity: 0.7 }]} 
+                        activeOpacity={0.7} 
+                        onPress={() => {
+                          Alert.alert(
+                            'App Store Sandbox',
+                            'Do you want to confirm your Chana Gold subscription? You will be charged recurring monthly fees.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              { text: 'Subscribe', onPress: handleSimulatedIAP }
+                            ]
+                          );
+                        }}
+                        disabled={loading}
+                      >
+                        <LinearGradient
+                          colors={['#FFD700', '#FDB931']}
+                          style={styles.upgradeGradient}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                        >
+                          {loading ? (
+                            <ActivityIndicator color="#000" size="small" />
+                          ) : (
+                            <Text style={styles.upgradeText}>Subscribe via App Store</Text>
+                          )}
+                        </LinearGradient>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity 
+                        style={styles.restoreBtn}
+                        onPress={handleRestoreIAP}
+                        disabled={loading}
+                      >
+                        <Text style={styles.restoreText}>Restore Purchases</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <>
+                      <TouchableOpacity 
+                        style={[styles.upgradeButton, loading && !isPolling && { opacity: 0.7 }]} 
+                        activeOpacity={0.7} 
+                        onPress={isPolling ? handleCancelPayment : handleUpgrade}
                         disabled={loading && !isPolling}
                       >
-                        <Ionicons name="refresh-circle" size={18} color="#FFD700" style={{ marginRight: 6 }} />
-                        <Text style={styles.checkStatusText}>Check Status Now</Text>
+                        <LinearGradient
+                          colors={['#FFD700', '#FDB931']}
+                          style={styles.upgradeGradient}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                        >
+                          {loading ? (
+                            <View style={styles.loadingRow}>
+                              <ActivityIndicator color="#000" size="small" style={{ marginRight: 6 }} />
+                              <Text style={styles.upgradeText}>
+                                {isPolling 
+                                  ? (paymentMethod === 'ecocash' ? 'Awaiting USSD... (Tap to Cancel)' : 'Awaiting Card... (Tap to Cancel)') 
+                                  : 'Processing...'}
+                              </Text>
+                            </View>
+                          ) : (
+                            <Text style={styles.upgradeText}>
+                              {paymentMethod === 'ecocash' ? 'Subscribe with EcoCash' : 'Subscribe with Card'}
+                            </Text>
+                          )}
+                        </LinearGradient>
                       </TouchableOpacity>
 
-                      <TouchableOpacity 
-                        style={styles.cancelPaymentBtn}
-                        onPress={handleCancelPayment}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons name="close-circle" size={15} color="#FF3B30" style={{ marginRight: 6 }} />
-                        <Text style={styles.cancelPaymentText}>Cancel</Text>
-                      </TouchableOpacity>
-                    </View>
+                      {isPolling && (
+                        <View style={styles.pollingActionsRow}>
+                          <TouchableOpacity 
+                            style={styles.checkStatusBtn}
+                            onPress={() => activeSubscriptionId && checkPaymentStatusManually(activeSubscriptionId)}
+                            activeOpacity={0.7}
+                            disabled={loading && !isPolling}
+                          >
+                            <Ionicons name="refresh-circle" size={18} color="#FFD700" style={{ marginRight: 6 }} />
+                            <Text style={styles.checkStatusText}>Check Status Now</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity 
+                            style={styles.cancelPaymentBtn}
+                            onPress={handleCancelPayment}
+                            activeOpacity={0.7}
+                          >
+                            <Ionicons name="close-circle" size={15} color="#FF3B30" style={{ marginRight: 6 }} />
+                            <Text style={styles.cancelPaymentText}>Cancel</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </>
                   )}
 
                   <Text style={styles.footerNote}>Recurring billing. Cancel anytime.</Text>
@@ -941,7 +1026,7 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 16,
     overflow: 'hidden',
-    ...SHADOWS.medium,
+    ...SHADOWS.soft,
   },
   upgradeGradient: {
     flex: 1,
@@ -952,9 +1037,6 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: FONTS.bodyBold,
     fontSize: 16,
-    textAlign: 'center',
-    includeFontPadding: false,
-    textAlignVertical: 'center',
   },
   footerNote: {
     marginTop: 16,
@@ -1121,5 +1203,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#FF3B30',
     letterSpacing: 0.4,
-  }
+  },
+  restoreBtn: {
+    alignSelf: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  restoreText: {
+    fontFamily: FONTS.body,
+    fontSize: 14,
+    color: '#8E8E93',
+    textDecorationLine: 'underline',
+  },
 });

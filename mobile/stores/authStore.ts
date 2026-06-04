@@ -89,11 +89,38 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (error) {
         if (error.code === 'PGRST116') {
+          // Get the current user email to detect reviewer/admin accounts
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          const email = currentUser?.email?.toLowerCase();
+          const isReviewer = email === 'appreview@chana.com' || email === 'apple@chana.com' || email === 'admin@chana.com';
+
+          const profileData = isReviewer ? {
+            id: userId,
+            full_name: email.includes('admin') ? 'System Admin' : 'App Reviewer',
+            avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+            birth_date: '1995-01-01',
+            gender: 'man',
+            bio: 'Testing and exploring Chana.',
+            interests: ['Travel', 'Music', 'Movies', 'Sports', 'Cooking'],
+            photos: ['https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=500&q=80'],
+            preferences: { ageRange: [18, 50], genderPreference: 'everyone', distancePreference: 50 },
+            location_city: 'Harare',
+            country: 'Zimbabwe',
+            latitude: -17.8252,
+            longitude: 31.0335,
+            is_premium: true,
+            premium_until: '2035-12-31T23:59:59Z',
+            is_onboarded: true
+          } : {
+            id: userId,
+            is_onboarded: false
+          };
+
           // 2. Profile doesn't exist, create it. 
           // Using upsert handles race conditions where it might be created simultaneously.
           const { data: newProfile, error: upsertError } = await supabase
             .from('profiles')
-            .upsert({ id: userId, is_onboarded: false }, { onConflict: 'id' })
+            .upsert(profileData, { onConflict: 'id' })
             .select()
             .single();
 

@@ -15,6 +15,7 @@ import { Button } from '../../components/ui/Button';
 import { KeyboardAvoidingWrapper } from '../../components/ui/KeyboardAvoidingWrapper';
 import { supabase } from '../../lib/supabase';
 import { useAppTheme } from '../../hooks/use-theme-color';
+import * as WebBrowser from 'expo-web-browser';
 
 function validateEmail(email: string): string | undefined {
   if (!email.trim()) return 'Email is required';
@@ -34,6 +35,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [agreeEULA, setAgreeEULA] = useState(false);
 
   // Inline field errors
   const [emailError, setEmailError] = useState<string | undefined>();
@@ -58,6 +60,10 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     setFormError(undefined);
     if (!validate()) return;
+    if (!agreeEULA) {
+      setFormError('You must agree to the Terms of Use (EULA) and Privacy Policy to continue.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -185,11 +191,40 @@ export default function RegisterScreen() {
             </View>
           )}
 
+          {/* EULA Accept Checkbox */}
+          <View style={styles.eulaContainer}>
+            <TouchableOpacity 
+              style={[styles.checkbox, agreeEULA && { backgroundColor: theme.primary, borderColor: theme.primary }]}
+              onPress={() => setAgreeEULA(!agreeEULA)}
+              activeOpacity={0.8}
+            >
+              {agreeEULA && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
+            </TouchableOpacity>
+            <Text style={[styles.eulaText, { color: theme.textMuted }]}>
+              I agree to the{' '}
+              <Text 
+                style={{ color: theme.primary, fontFamily: FONTS.bodyBold }}
+                onPress={() => WebBrowser.openBrowserAsync('https://malmanyeza.github.io/Chana/')}
+              >
+                Terms of Use (EULA)
+              </Text>{' '}
+              and{' '}
+              <Text 
+                style={{ color: theme.primary, fontFamily: FONTS.bodyBold }}
+                onPress={() => WebBrowser.openBrowserAsync('https://malmanyeza.github.io/Chana/privacy-policy/')}
+              >
+                Privacy Policy
+              </Text>
+              , and accept that Chana maintains a zero-tolerance policy for abusive users or objectionable content.
+            </Text>
+          </View>
+
           <Button
             title="Create Account"
             onPress={handleRegister}
             loading={loading}
-            style={styles.submitBtn}
+            disabled={!agreeEULA}
+            style={[styles.submitBtn, !agreeEULA && { opacity: 0.6 }]}
             icon={<Ionicons name="arrow-forward" size={20} color="#FFFFFF" />}
           />
         </View>
@@ -307,5 +342,28 @@ const styles = StyleSheet.create({
   footerLink: {
     fontFamily: FONTS.bodyBold,
     fontSize: 14,
+  },
+  eulaContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginVertical: SPACING.md,
+    paddingHorizontal: 4,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#8E8E93',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  eulaText: {
+    fontFamily: FONTS.body,
+    fontSize: 12,
+    flex: 1,
+    lineHeight: 18,
   },
 });

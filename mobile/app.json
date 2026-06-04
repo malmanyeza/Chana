@@ -13,7 +13,8 @@
       "bundleIdentifier": "com.chana.app",
       "buildNumber": "7",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Chana uses your location to discover and match you with other users in your local neighborhood, for example showing other community members within 10 kilometers of your current position."
       }
     },
     "android": {

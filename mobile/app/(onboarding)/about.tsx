@@ -22,7 +22,14 @@ export default function NameOnboarding() {
   const router = useRouter();
   const theme = useAppTheme();
   const { data, updateData } = useOnboardingStore();
-  const { signOut } = useAuthStore();
+  const { signOut, user } = useAuthStore();
+
+  React.useEffect(() => {
+    const metaName = user?.user_metadata?.full_name || user?.user_metadata?.name;
+    if (!data.fullName && metaName) {
+      updateData({ fullName: metaName });
+    }
+  }, [user]);
 
   const isComplete = data.fullName && data.fullName.trim().length > 2;
 
